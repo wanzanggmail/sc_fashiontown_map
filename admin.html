@@ -42,6 +42,20 @@
   #tokenBox input{width:280px;}
   a.link{color:var(--accent);}
 
+  #authGate{
+    position:fixed;inset:0;z-index:2000;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .auth-box{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:28px 24px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 24px rgba(43,38,32,.15);
+  }
+  .auth-box h2{margin:0 0 16px;font-size:16px;}
+  .auth-box input{width:100%;margin-bottom:10px;text-align:center;}
+  .auth-box button{width:100%;}
+  .auth-box .hint{margin-top:10px;min-height:16px;color:var(--danger);}
+  #appRoot{display:none;}
+
   #mapPickWrap{
     position:relative;max-width:480px;margin:0 auto;border:1px solid var(--line);border-radius:10px;
     overflow:hidden;cursor:crosshair;user-select:none;
@@ -96,30 +110,22 @@
 </style>
 </head>
 <body>
+<div id="authGate">
+  <div class="auth-box">
+    <h2>🔒 관리자 인증</h2>
+    <input id="authInput" type="password" placeholder="비밀번호" autocomplete="off">
+    <button id="authBtn" class="btn-primary">입장</button>
+    <div id="authMsg" class="hint"></div>
+  </div>
+</div>
+
+<div id="appRoot">
 <header>
   <h1>🗂 골목상권 지도 · 관리자</h1>
   <div id="status">초기화 중...</div>
 </header>
 
 <main>
-  <div class="panel">
-    <div class="toolbar">
-      <strong>GitHub 저장 설정</strong>
-    </div>
-    <div id="tokenBox" class="row">
-      <input id="repoInput" placeholder="owner/repo" value="wanzanggmail/sc_fashiontown_map">
-      <input id="branchInput" placeholder="branch" value="main">
-      <input id="tokenInput" type="password" placeholder="GitHub Personal Access Token (repo 쓰기 권한)">
-      <button id="saveTokenBtn" class="btn-ghost">토큰 저장</button>
-      <button id="clearTokenBtn" class="btn-ghost">토큰 삭제</button>
-    </div>
-    <p class="hint">
-      토큰은 이 브라우저의 localStorage에만 저장되며 서버로 전송되지 않습니다(GitHub API 호출에만 사용).
-      <a class="link" href="https://github.com/settings/tokens/new?scopes=repo&description=sc_map_admin" target="_blank" rel="noopener">여기서 발급</a>
-      (fine-grained 토큰이면 해당 저장소에 Contents 읽기/쓰기 권한 부여).
-    </p>
-  </div>
-
   <div class="panel">
     <div class="toolbar">
       <strong>점포 목록 (<span id="countLabel">0</span>개)</strong>
@@ -156,9 +162,73 @@
     </div>
     <button id="addCatBtn" class="btn-ghost" style="margin-top:8px;">+ 카테고리 추가</button>
   </div>
+
+  <div class="panel">
+    <div class="toolbar">
+      <strong>GitHub 저장 설정</strong>
+      <button id="githubSettingsToggle" class="btn-ghost">열기</button>
+    </div>
+    <div id="githubSettingsBody" style="display:none;">
+      <div id="tokenBox" class="row">
+        <input id="repoInput" placeholder="owner/repo" value="wanzanggmail/sc_fashiontown_map">
+        <input id="branchInput" placeholder="branch" value="main">
+        <input id="tokenInput" type="password" placeholder="GitHub Personal Access Token (repo 쓰기 권한)">
+        <button id="saveTokenBtn" class="btn-ghost">토큰 저장</button>
+        <button id="clearTokenBtn" class="btn-ghost">토큰 삭제</button>
+      </div>
+      <p class="hint">
+        토큰은 이 브라우저의 localStorage에만 저장되며 서버로 전송되지 않습니다(GitHub API 호출에만 사용).
+        <a class="link" href="https://github.com/settings/tokens/new?scopes=repo&description=sc_map_admin" target="_blank" rel="noopener">여기서 발급</a>
+        (fine-grained 토큰이면 해당 저장소에 Contents 읽기/쓰기 권한 부여).
+      </p>
+    </div>
+  </div>
 </main>
+</div>
 
 <script>
+/* =========================================================
+   비밀번호 인증 (해시만 저장, 평문 비밀번호는 코드에 없음)
+========================================================= */
+const ADMIN_PW_HASH = 'e5b697d1a51935b0a54316ae32a19d2da13ebd4aec1c1d2116c048c2794058a7';
+
+async function sha256Hex(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+const authGate = document.getElementById('authGate');
+const appRoot = document.getElementById('appRoot');
+const authInput = document.getElementById('authInput');
+const authBtn = document.getElementById('authBtn');
+const authMsg = document.getElementById('authMsg');
+
+function unlockApp(){
+  authGate.style.display = 'none';
+  appRoot.style.display = 'block';
+  loadData();
+}
+
+async function tryAuth(){
+  const hash = await sha256Hex(authInput.value);
+  if (hash === ADMIN_PW_HASH) {
+    sessionStorage.setItem('sc_admin_authed', '1');
+    unlockApp();
+  } else {
+    authMsg.textContent = '비밀번호가 올바르지 않습니다.';
+    authInput.value = '';
+    authInput.focus();
+  }
+}
+authBtn.onclick = tryAuth;
+authInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryAuth(); });
+
+if (sessionStorage.getItem('sc_admin_authed') === '1') {
+  unlockApp();
+} else {
+  authInput.focus();
+}
+
 const STATUS_EL = document.getElementById('status');
 function setStatus(msg, cls){
   STATUS_EL.textContent = msg;
@@ -464,6 +534,14 @@ async function handleImageSelect(inp){
 
 document.getElementById('reloadBtn').onclick = loadData;
 
+const githubSettingsToggle = document.getElementById('githubSettingsToggle');
+const githubSettingsBody = document.getElementById('githubSettingsBody');
+githubSettingsToggle.onclick = () => {
+  const isOpen = githubSettingsBody.style.display !== 'none';
+  githubSettingsBody.style.display = isOpen ? 'none' : 'block';
+  githubSettingsToggle.textContent = isOpen ? '열기' : '닫기';
+};
+
 document.getElementById('saveBtn').onclick = async () => {
   const token = tokenInput.value.trim();
   const repo = repoInput.value.trim();
@@ -494,8 +572,6 @@ document.getElementById('saveBtn').onclick = async () => {
     setStatus('저장 실패: ' + err.message, 'err');
   }
 };
-
-loadData();
 </script>
 </body>
 </html>
