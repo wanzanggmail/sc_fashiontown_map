@@ -41,6 +41,22 @@
   #tokenBox{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   #tokenBox input{width:280px;}
   a.link{color:var(--accent);}
+
+  #mapPickWrap{
+    position:relative;max-width:480px;margin:0 auto;border:1px solid var(--line);border-radius:10px;
+    overflow:hidden;cursor:crosshair;user-select:none;
+  }
+  #mapPickImg{display:block;width:100%;height:auto;}
+  #mapPickDots{position:absolute;inset:0;pointer-events:none;}
+  .map-dot{
+    position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid #fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.4);transform:translate(-50%,-50%);
+  }
+  .map-dot.target{width:18px;height:18px;border-color:var(--ink);box-shadow:0 0 0 3px rgba(43,38,32,.35);}
+  #mapPickCoord{
+    position:absolute;top:8px;left:8px;background:rgba(43,38,32,.75);color:#fff;font-size:11px;
+    padding:3px 8px;border-radius:6px;pointer-events:none;display:none;
+  }
 </style>
 </head>
 <body>
@@ -93,6 +109,20 @@
         </thead>
         <tbody id="tbody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="toolbar">
+      <strong>🎯 지도에서 좌표 찍기</strong>
+      <div class="row">
+        <span id="pinHint" class="hint">아래 지도를 클릭하면 새 점포가 그 위치에 추가됩니다. 기존 점포 좌표를 바꾸려면 목록에서 "여기로" 버튼을 먼저 누르세요.</span>
+      </div>
+    </div>
+    <div id="mapPickWrap">
+      <img id="mapPickImg" src="map-illustration.png" alt="지도">
+      <div id="mapPickDots"></div>
+      <div id="mapPickCoord"></div>
     </div>
   </div>
 
@@ -224,8 +254,12 @@ function renderStores(){
       <td><input data-idx="${idx}" data-f="phone" value="${s.phone||''}"></td>
       <td><input data-idx="${idx}" data-f="products" value="${(s.products||[]).join(', ')}"></td>
       <td><input data-idx="${idx}" data-f="naverUrl" value="${s.naverUrl||''}"></td>
-      <td class="actions"><button class="btn-danger" data-del="${idx}">삭제</button></td>
+      <td class="actions">
+        <button class="btn-ghost" data-pin="${idx}">여기로</button>
+        <button class="btn-danger" data-del="${idx}">삭제</button>
+      </td>
     `;
+    if (idx === pinTargetIdx) tr.style.outline = '2px solid var(--accent)';
     tbody.appendChild(tr);
   });
   tbody.querySelectorAll('input,select').forEach(el => {
@@ -234,12 +268,88 @@ function renderStores(){
       if (f === 'x' || f === 'y') data.stores[idx][f] = Number(el.value);
       else if (f === 'products') data.stores[idx][f] = el.value.split(',').map(p=>p.trim()).filter(Boolean);
       else data.stores[idx][f] = el.value;
+      if (f === 'x' || f === 'y' || f === 'cat') renderMapDots();
     };
   });
   tbody.querySelectorAll('[data-del]').forEach(btn => {
-    btn.onclick = () => { data.stores.splice(btn.dataset.del, 1); renderStores(); };
+    btn.onclick = () => {
+      const idx = Number(btn.dataset.del);
+      data.stores.splice(idx, 1);
+      if (pinTargetIdx === idx) pinTargetIdx = null;
+      renderStores(); renderMapDots();
+    };
+  });
+  tbody.querySelectorAll('[data-pin]').forEach(btn => {
+    btn.onclick = () => {
+      pinTargetIdx = Number(btn.dataset.pin);
+      pinHintEl.textContent = `"${data.stores[pinTargetIdx].name}" 위치를 지도에서 클릭하세요.`;
+      renderStores(); renderMapDots();
+      document.getElementById('mapPickWrap').scrollIntoView({behavior:'smooth', block:'center'});
+    };
+  });
+  renderMapDots();
+}
+
+/* =========================================================
+   지도 클릭으로 좌표 찍기
+========================================================= */
+let pinTargetIdx = null; // null이면 클릭 시 새 점포 추가
+const mapPickWrap = document.getElementById('mapPickWrap');
+const mapPickImg = document.getElementById('mapPickImg');
+const mapPickDots = document.getElementById('mapPickDots');
+const mapPickCoord = document.getElementById('mapPickCoord');
+const pinHintEl = document.getElementById('pinHint');
+
+function renderMapDots(){
+  if (!data) return;
+  mapPickDots.innerHTML = '';
+  data.stores.forEach((s, idx) => {
+    const cat = data.categories.find(c => c.id === s.cat);
+    const dot = document.createElement('div');
+    dot.className = 'map-dot' + (idx === pinTargetIdx ? ' target' : '');
+    dot.style.left = (s.x / data.imageSize.w * 100) + '%';
+    dot.style.top = (s.y / data.imageSize.h * 100) + '%';
+    dot.style.background = cat ? cat.color : '#999';
+    dot.title = s.name;
+    mapPickDots.appendChild(dot);
   });
 }
+
+mapPickWrap.addEventListener('mousemove', (e) => {
+  if (!data) return;
+  const rect = mapPickImg.getBoundingClientRect();
+  const x = Math.round((e.clientX - rect.left) / rect.width * data.imageSize.w);
+  const y = Math.round((e.clientY - rect.top) / rect.height * data.imageSize.h);
+  mapPickCoord.textContent = `X:${x} Y:${y}`;
+  mapPickCoord.style.display = 'block';
+});
+mapPickWrap.addEventListener('mouseleave', () => { mapPickCoord.style.display = 'none'; });
+
+mapPickWrap.addEventListener('click', (e) => {
+  if (!data) return;
+  const rect = mapPickImg.getBoundingClientRect();
+  const x = Math.round((e.clientX - rect.left) / rect.width * data.imageSize.w);
+  const y = Math.round((e.clientY - rect.top) / rect.height * data.imageSize.h);
+
+  if (pinTargetIdx !== null && data.stores[pinTargetIdx]) {
+    data.stores[pinTargetIdx].x = x;
+    data.stores[pinTargetIdx].y = y;
+    pinHintEl.textContent = `"${data.stores[pinTargetIdx].name}" 좌표를 (${x}, ${y})로 이동했습니다.`;
+    pinTargetIdx = null;
+    renderStores();
+  } else {
+    data.stores.push({
+      id: 'store-' + Date.now(),
+      name: '새 점포',
+      cat: data.categories[0] ? data.categories[0].id : '',
+      x, y,
+      phone: '', products: [], naverUrl: '#'
+    });
+    pinHintEl.textContent = `(${x}, ${y})에 새 점포를 추가했습니다. 아래 목록에서 이름/카테고리를 입력하세요.`;
+    renderStores();
+    tbody.lastElementChild && tbody.lastElementChild.querySelector('input').focus();
+  }
+});
 
 document.getElementById('addBtn').onclick = () => {
   const nextIdx = data.stores.length;
