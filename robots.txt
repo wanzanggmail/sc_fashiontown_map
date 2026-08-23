@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://wanzanggmail.github.io/sc_fashiontown_map/sitemap.xml
