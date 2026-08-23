@@ -411,9 +411,12 @@ sheetBackdrop.onclick = closeSheetFn;
 renderChips();
 
 /* =========================================================
-   8) URL로 특정 점포 바로 열기 (?store=store-id)
+   8) URL로 특정 점포 바로 열기
+   짧은 형식 ?s=0 (권장) 또는 예전 형식 ?store=store-0 모두 지원
 ========================================================= */
-const requestedStoreId = new URLSearchParams(location.search).get('store');
+const urlParams = new URLSearchParams(location.search);
+const shortId = urlParams.get('s');
+const requestedStoreId = shortId !== null ? ('store-' + shortId) : urlParams.get('store');
 if (requestedStoreId && STORES.some(s => s.id === requestedStoreId)) {
   selectStore(requestedStoreId, true);
 }

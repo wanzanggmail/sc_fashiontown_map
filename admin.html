@@ -337,7 +337,8 @@ function catOptions(selected){
 
 function storeLinkUrl(storeId){
   const base = new URL('.', location.href).href;
-  return base + '?store=' + encodeURIComponent(storeId);
+  const shortId = storeId.replace(/^store-/, '');
+  return base + '?s=' + encodeURIComponent(shortId);
 }
 
 function renderStores(){
