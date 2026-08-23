@@ -57,6 +57,11 @@
     position:absolute;top:8px;left:8px;background:rgba(43,38,32,.75);color:#fff;font-size:11px;
     padding:3px 8px;border-radius:6px;pointer-events:none;display:none;
   }
+  .img-cell{display:flex;flex-direction:column;gap:4px;align-items:flex-start;}
+  .img-cell img.thumb{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line);}
+  .img-cell input[type=file]{font-size:11px;width:120px;}
+  .img-cell .hint{font-size:10px;line-height:1.4;}
+  .pin-cell{display:flex;flex-direction:column;gap:4px;}
 </style>
 </head>
 <body>
@@ -97,14 +102,15 @@
       <table>
         <thead>
           <tr>
-            <th style="width:16%">이름</th>
-            <th style="width:10%">카테고리</th>
-            <th style="width:6%">X</th>
-            <th style="width:6%">Y</th>
-            <th style="width:12%">전화</th>
-            <th style="width:18%">대표상품(쉼표구분)</th>
-            <th style="width:18%">네이버 URL</th>
-            <th style="width:8%">삭제</th>
+            <th style="width:13%">이름</th>
+            <th style="width:9%">카테고리</th>
+            <th style="width:5%">X</th>
+            <th style="width:5%">Y</th>
+            <th style="width:10%">전화</th>
+            <th style="width:16%">설명</th>
+            <th style="width:13%">이미지</th>
+            <th style="width:15%">네이버 URL</th>
+            <th style="width:14%">좌표/삭제</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -116,7 +122,7 @@
     <div class="toolbar">
       <strong>🎯 지도에서 좌표 찍기</strong>
       <div class="row">
-        <span id="pinHint" class="hint">아래 지도를 클릭하면 새 점포가 그 위치에 추가됩니다. 기존 점포 좌표를 바꾸려면 목록에서 "여기로" 버튼을 먼저 누르세요.</span>
+        <span id="pinHint" class="hint">점포 목록에서 "여기로" 버튼을 누르면 이 지도에서 위치를 클릭해 옮길 수 있습니다.</span>
       </div>
     </div>
     <div id="mapPickWrap">
@@ -252,39 +258,55 @@ function renderStores(){
       <td><input data-idx="${idx}" data-f="x" type="number" value="${s.x}"></td>
       <td><input data-idx="${idx}" data-f="y" type="number" value="${s.y}"></td>
       <td><input data-idx="${idx}" data-f="phone" value="${s.phone||''}"></td>
-      <td><input data-idx="${idx}" data-f="products" value="${(s.products||[]).join(', ')}"></td>
+      <td><input data-idx="${idx}" data-f="description" value="${s.description||''}"></td>
+      <td>
+        <div class="img-cell">
+          <img class="thumb" data-thumb="${idx}" src="${s.image||''}" style="${s.image?'':'display:none'}">
+          <input type="file" accept="image/*" data-imgidx="${idx}">
+          <div class="hint">권장 800×800px 이상<br>(정사각형, 자동 480px로 축소)</div>
+        </div>
+      </td>
       <td><input data-idx="${idx}" data-f="naverUrl" value="${s.naverUrl||''}"></td>
       <td class="actions">
-        <button class="btn-ghost" data-pin="${idx}">여기로</button>
-        <button class="btn-danger" data-del="${idx}">삭제</button>
+        <div class="pin-cell">
+          <button class="btn-ghost" data-pin="${idx}">${idx===pinTargetIdx ? '여기 클릭 대기중' : '여기로'}</button>
+          <button class="btn-danger" data-del="${idx}">삭제</button>
+        </div>
       </td>
     `;
     if (idx === pinTargetIdx) tr.style.outline = '2px solid var(--accent)';
     tbody.appendChild(tr);
   });
-  tbody.querySelectorAll('input,select').forEach(el => {
+  tbody.querySelectorAll('input[data-f],select[data-f]').forEach(el => {
     el.oninput = () => {
       const idx = el.dataset.idx, f = el.dataset.f;
       if (f === 'x' || f === 'y') data.stores[idx][f] = Number(el.value);
-      else if (f === 'products') data.stores[idx][f] = el.value.split(',').map(p=>p.trim()).filter(Boolean);
       else data.stores[idx][f] = el.value;
       if (f === 'x' || f === 'y' || f === 'cat') renderMapDots();
     };
+  });
+  tbody.querySelectorAll('[data-imgidx]').forEach(inp => {
+    inp.onchange = () => handleImageSelect(inp);
   });
   tbody.querySelectorAll('[data-del]').forEach(btn => {
     btn.onclick = () => {
       const idx = Number(btn.dataset.del);
       data.stores.splice(idx, 1);
       if (pinTargetIdx === idx) pinTargetIdx = null;
-      renderStores(); renderMapDots();
+      renderStores();
     };
   });
   tbody.querySelectorAll('[data-pin]').forEach(btn => {
     btn.onclick = () => {
-      pinTargetIdx = Number(btn.dataset.pin);
-      pinHintEl.textContent = `"${data.stores[pinTargetIdx].name}" 위치를 지도에서 클릭하세요.`;
-      renderStores(); renderMapDots();
-      document.getElementById('mapPickWrap').scrollIntoView({behavior:'smooth', block:'center'});
+      const idx = Number(btn.dataset.pin);
+      pinTargetIdx = (pinTargetIdx === idx) ? null : idx;
+      pinHintEl.textContent = pinTargetIdx === null
+        ? '점포 목록에서 "여기로" 버튼을 누르면 이 지도에서 위치를 클릭해 옮길 수 있습니다.'
+        : `"${data.stores[idx].name}" 위치를 아래 지도에서 클릭하세요.`;
+      renderStores();
+      if (pinTargetIdx !== null) {
+        document.getElementById('mapPickWrap').scrollIntoView({behavior:'smooth', block:'center'});
+      }
     };
   });
   renderMapDots();
@@ -293,7 +315,7 @@ function renderStores(){
 /* =========================================================
    지도 클릭으로 좌표 찍기
 ========================================================= */
-let pinTargetIdx = null; // null이면 클릭 시 새 점포 추가
+let pinTargetIdx = null; // null이면 지도 클릭이 무시됨 ("여기로" 버튼으로 활성화)
 const mapPickWrap = document.getElementById('mapPickWrap');
 const mapPickImg = document.getElementById('mapPickImg');
 const mapPickDots = document.getElementById('mapPickDots');
@@ -327,41 +349,106 @@ mapPickWrap.addEventListener('mouseleave', () => { mapPickCoord.style.display = 
 
 mapPickWrap.addEventListener('click', (e) => {
   if (!data) return;
+  if (pinTargetIdx === null || !data.stores[pinTargetIdx]) {
+    pinHintEl.textContent = '먼저 점포 목록에서 "여기로" 버튼을 눌러 옮길 점포를 선택하세요.';
+    return;
+  }
   const rect = mapPickImg.getBoundingClientRect();
   const x = Math.round((e.clientX - rect.left) / rect.width * data.imageSize.w);
   const y = Math.round((e.clientY - rect.top) / rect.height * data.imageSize.h);
-
-  if (pinTargetIdx !== null && data.stores[pinTargetIdx]) {
-    data.stores[pinTargetIdx].x = x;
-    data.stores[pinTargetIdx].y = y;
-    pinHintEl.textContent = `"${data.stores[pinTargetIdx].name}" 좌표를 (${x}, ${y})로 이동했습니다.`;
-    pinTargetIdx = null;
-    renderStores();
-  } else {
-    data.stores.push({
-      id: 'store-' + Date.now(),
-      name: '새 점포',
-      cat: data.categories[0] ? data.categories[0].id : '',
-      x, y,
-      phone: '', products: [], naverUrl: '#'
-    });
-    pinHintEl.textContent = `(${x}, ${y})에 새 점포를 추가했습니다. 아래 목록에서 이름/카테고리를 입력하세요.`;
-    renderStores();
-    tbody.lastElementChild && tbody.lastElementChild.querySelector('input').focus();
-  }
+  const store = data.stores[pinTargetIdx];
+  store.x = x; store.y = y;
+  pinHintEl.textContent = `"${store.name}" 좌표를 (${x}, ${y})로 이동했습니다.`;
+  pinTargetIdx = null;
+  renderStores();
 });
 
 document.getElementById('addBtn').onclick = () => {
-  const nextIdx = data.stores.length;
+  const idx = data.stores.length;
   data.stores.push({
     id: 'store-' + Date.now(),
     name: '새 점포',
     cat: data.categories[0] ? data.categories[0].id : '',
-    x: 200, y: 200,
-    phone: '', products: [], naverUrl: '#'
+    x: Math.round(data.imageSize.w/2), y: Math.round(data.imageSize.h/2),
+    phone: '', description: '', image: '', naverUrl: '#'
   });
+  pinTargetIdx = idx;
+  pinHintEl.textContent = '"새 점포" 위치를 아래 지도에서 클릭하세요.';
   renderStores();
+  tbody.lastElementChild && tbody.lastElementChild.querySelector('input').focus();
+  document.getElementById('mapPickWrap').scrollIntoView({behavior:'smooth', block:'center'});
 };
+
+/* =========================================================
+   이미지 업로드 (리사이즈 후 GitHub에 파일로 저장)
+========================================================= */
+const IMG_MAX_SIZE = 480; // 모바일에 적당한 썸네일 해상도
+
+function resizeImageToDataURL(file, maxSize){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('이미지를 열 수 없습니다'));
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        const scale = Math.min(1, maxSize / Math.max(w, h));
+        w = Math.round(w * scale); h = Math.round(h * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadFileToGithub(path, base64Content, message){
+  const token = tokenInput.value.trim();
+  if (!token) throw new Error('GitHub 토큰이 필요합니다');
+  const repo = repoInput.value.trim();
+  const branch = branchInput.value.trim();
+  let sha;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`, { headers: ghHeaders() });
+    if (res.ok) sha = (await res.json()).sha;
+  } catch (e) { /* 파일이 없으면 무시 */ }
+  const body = { message, content: base64Content, branch };
+  if (sha) body.sha = sha;
+  const res2 = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+    method: 'PUT',
+    headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res2.ok) {
+    const errBody = await res2.json().catch(()=>({}));
+    throw new Error(res2.status + ' ' + (errBody.message || ''));
+  }
+}
+
+async function handleImageSelect(inp){
+  const idx = Number(inp.dataset.imgidx);
+  const file = inp.files[0];
+  if (!file) return;
+  setStatus('이미지 리사이즈 중...');
+  try {
+    const dataUrl = await resizeImageToDataURL(file, IMG_MAX_SIZE);
+    const thumb = document.querySelector(`img[data-thumb="${idx}"]`);
+    if (thumb) { thumb.src = dataUrl; thumb.style.display = 'block'; }
+
+    setStatus('GitHub에 이미지 업로드 중...');
+    const path = `images/${data.stores[idx].id}.jpg`;
+    const base64 = dataUrl.split(',')[1];
+    await uploadFileToGithub(path, base64, `admin: upload image for ${data.stores[idx].name}`);
+    data.stores[idx].image = path;
+    setStatus('이미지 업로드 완료 ✓ ("GitHub에 저장"을 눌러 목록 정보도 저장하세요)', 'ok');
+  } catch (err) {
+    setStatus('이미지 업로드 실패: ' + err.message, 'err');
+  }
+}
 
 document.getElementById('reloadBtn').onclick = loadData;
 

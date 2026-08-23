@@ -119,8 +119,7 @@
   }
   .sheet-cat{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:2px;}
   .sheet-name{font-size:19px;font-weight:800;color:var(--ink);line-height:1.3;}
-  .sheet-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
-  .sheet-tag{font-size:11px;background:#efe7d5;color:var(--ink-soft);padding:3px 8px;border-radius:999px;}
+  .sheet-desc{margin-top:12px;font-size:13px;color:var(--ink-soft);line-height:1.6;}
   .sheet-info{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;}
   .info-row{display:flex;gap:10px;font-size:14px;color:var(--ink);padding:6px 0;align-items:flex-start;}
   .info-row .k{flex:none;width:64px;color:var(--ink-soft);font-weight:600;}
@@ -341,20 +340,20 @@ function openSheet(id){
   const store = STORES.find(s=>s.id===id);
   if(!store) return;
   const color = catMap[store.cat].color;
+  const photoContent = store.image
+    ? `<img src="${store.image}" alt="${store.name}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`
+    : store.name[0];
   sheetBody.innerHTML = `
     <div class="sheet-top">
-      <div class="sheet-photo" style="background:${color}">${store.name[0]}</div>
+      <div class="sheet-photo" style="background:${color}">${photoContent}</div>
       <div>
         <div class="sheet-cat">${store.catLabel}</div>
         <div class="sheet-name">${store.name}</div>
-        <div class="sheet-tags">
-          ${store.products.map(p=>`<span class="sheet-tag">${p}</span>`).join('')}
-        </div>
       </div>
     </div>
+    ${store.description ? `<div class="sheet-desc">${store.description}</div>` : ''}
     <div class="sheet-info">
       <div class="info-row"><div class="k">전화</div><div>${store.phone}</div></div>
-      <div class="info-row"><div class="k">대표상품</div><div>${store.products.join(', ')}</div></div>
     </div>
     <div class="sheet-actions">
       <a class="btn btn-secondary" href="tel:${store.phone}">전화하기</a>
