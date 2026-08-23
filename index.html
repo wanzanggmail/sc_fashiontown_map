@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>신천패션타운 골목상권 지도 | 시흥 신천패션타운 매장 안내</title>
+<title>신천패션타운 지도 | 시흥 신천패션타운 매장 안내</title>
 <meta name="description" content="시흥 신천패션타운 골목상권 지도. 스포츠·아웃도어·골프·패션잡화 매장 위치, 전화번호, 길찾기를 한눈에 확인하세요.">
 <meta name="keywords" content="신천패션타운, 시흥 신천패션타운, 시흥 골목상권, 골목상권 지도, 신천 아울렛">
 <meta name="author" content="신천패션타운">
@@ -28,8 +28,8 @@
 {
   "@context": "https://schema.org",
   "@type": "Map",
-  "name": "신천패션타운 골목상권 지도",
-  "description": "시흥 신천패션타운 골목상권 지도. 스포츠·아웃도어·골프·패션잡화 매장 위치와 연락처를 확인할 수 있습니다.",
+  "name": "신천패션타운 지도",
+  "description": "시흥 신천패션타운 지도. 스포츠·아웃도어·골프·패션잡화 매장 위치와 연락처를 확인할 수 있습니다.",
   "url": "https://wanzanggmail.github.io/sc_fashiontown_map/"
 }
 </script>
@@ -92,6 +92,23 @@
   #resultCount{
     font-size:12px;color:var(--ink-soft);margin:8px 4px 0;min-height:16px;
   }
+
+  #searchWrap{position:relative;}
+  #autocompleteList{
+    display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:1100;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);max-height:280px;overflow-y:auto;
+  }
+  #autocompleteList.show{display:block;}
+  .ac-item{
+    display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;
+    border-bottom:1px solid var(--line);
+  }
+  .ac-item:last-child{border-bottom:none;}
+  .ac-item:hover, .ac-item.active{background:#f3ead9;}
+  .ac-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .ac-name{flex:1;font-size:14px;color:var(--ink);font-weight:600;}
+  .ac-cat{font-size:11px;color:var(--ink-soft);flex:none;}
 
   /* ---------- 지도 ---------- */
   #map{position:absolute;inset:0;background:var(--paper);}
@@ -177,10 +194,13 @@
 
   <div id="topbar">
     <div class="brand">신천패션타운 · 골목상권 지도</div>
-    <div id="searchRow">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <input id="searchInput" type="text" placeholder="점포명 또는 카테고리 검색" autocomplete="off">
-      <button id="clearBtn">✕</button>
+    <div id="searchWrap">
+      <div id="searchRow">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="searchInput" type="text" placeholder="점포명 또는 카테고리 검색" autocomplete="off">
+        <button id="clearBtn">✕</button>
+      </div>
+      <div id="autocompleteList"></div>
     </div>
     <div id="chips"></div>
     <div id="resultCount"></div>
@@ -337,8 +357,87 @@ function applyFilter(){
   }
 }
 
-searchInput.addEventListener('input', applyFilter);
-clearBtn.addEventListener('click', ()=>{ searchInput.value=''; applyFilter(); searchInput.focus(); });
+searchInput.addEventListener('input', ()=>{ applyFilter(); renderAutocomplete(); });
+clearBtn.addEventListener('click', ()=>{ searchInput.value=''; applyFilter(); hideAutocomplete(); searchInput.focus(); });
+
+/* =========================================================
+   6b) 검색 자동완성
+========================================================= */
+const autocompleteListEl = document.getElementById('autocompleteList');
+let acItems = [];
+let acActiveIndex = -1;
+
+function renderAutocomplete(){
+  const q = searchInput.value.trim().toLowerCase();
+  acActiveIndex = -1;
+  if(!q){ hideAutocomplete(); return; }
+
+  acItems = STORES.filter(s=>{
+    const matchesCat = !activeCat || s.cat===activeCat;
+    const matchesQuery = s.name.toLowerCase().includes(q) || s.catLabel.toLowerCase().includes(q);
+    return matchesCat && matchesQuery;
+  }).slice(0, 8);
+
+  if(acItems.length===0){ hideAutocomplete(); return; }
+
+  autocompleteListEl.innerHTML = acItems.map((s,i)=>`
+    <div class="ac-item" data-ac="${i}">
+      <span class="ac-dot" style="background:${catMap[s.cat].color}"></span>
+      <span class="ac-name">${s.name}</span>
+      <span class="ac-cat">${s.catLabel}</span>
+    </div>
+  `).join('');
+  autocompleteListEl.classList.add('show');
+
+  autocompleteListEl.querySelectorAll('[data-ac]').forEach(el=>{
+    el.addEventListener('mousedown', (e)=>{
+      e.preventDefault(); // blur보다 먼저 처리되도록
+      pickAutocomplete(Number(el.dataset.ac));
+    });
+  });
+}
+
+function hideAutocomplete(){
+  autocompleteListEl.classList.remove('show');
+  autocompleteListEl.innerHTML = '';
+  acItems = [];
+  acActiveIndex = -1;
+}
+
+function updateAutocompleteActive(){
+  autocompleteListEl.querySelectorAll('.ac-item').forEach((el,i)=>{
+    el.classList.toggle('active', i===acActiveIndex);
+  });
+}
+
+function pickAutocomplete(i){
+  const store = acItems[i];
+  if(!store) return;
+  searchInput.value = store.name;
+  hideAutocomplete();
+  applyFilter();
+  selectStore(store.id, true);
+}
+
+searchInput.addEventListener('keydown', (e)=>{
+  if(!autocompleteListEl.classList.contains('show')) return;
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    acActiveIndex = Math.min(acActiveIndex+1, acItems.length-1);
+    updateAutocompleteActive();
+  } else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    acActiveIndex = Math.max(acActiveIndex-1, 0);
+    updateAutocompleteActive();
+  } else if(e.key==='Enter'){
+    if(acActiveIndex>=0){ pickAutocomplete(acActiveIndex); }
+    else if(acItems.length>0){ pickAutocomplete(0); }
+  } else if(e.key==='Escape'){
+    hideAutocomplete();
+  }
+});
+searchInput.addEventListener('focus', ()=>{ if(searchInput.value.trim()) renderAutocomplete(); });
+searchInput.addEventListener('blur', ()=>{ hideAutocomplete(); });
 
 /* =========================================================
    7) 핀 포커스 이동 + 바텀시트
