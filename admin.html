@@ -90,6 +90,8 @@
   .store-line .f-desc{grid-column:span 10;}
   .store-line .img-cell{grid-column:span 8;}
   .store-line .f-naver{grid-column:span 6;}
+  .store-line .f-link{grid-column:span 19;color:var(--ink-soft);font-size:12px;}
+  .store-line [data-copylink]{grid-column:span 5;}
   .store-line .btn-ghost, .store-line .btn-danger{padding:8px 6px;font-size:12px;white-space:nowrap;}
   .store-line input, .store-line select{width:100%;min-width:0;box-sizing:border-box;}
   .store-line input[type=number]{-moz-appearance:textfield;}
@@ -106,6 +108,8 @@
     .store-line .f-desc{grid-column:span 12;}
     .store-line .img-cell{grid-column:span 12;}
     .store-line .f-naver{grid-column:span 12;}
+    .store-line .f-link{grid-column:span 8;}
+    .store-line [data-copylink]{grid-column:span 4;}
   }
 </style>
 </head>
@@ -331,6 +335,11 @@ function catOptions(selected){
   return data.categories.map(c => `<option value="${c.id}" ${c.id===selected?'selected':''}>${c.label}</option>`).join('');
 }
 
+function storeLinkUrl(storeId){
+  const base = new URL('.', location.href).href;
+  return base + '?store=' + encodeURIComponent(storeId);
+}
+
 function renderStores(){
   tbody.innerHTML = '';
   countLabel.textContent = data.stores.length;
@@ -356,6 +365,10 @@ function renderStores(){
         </div>
         <input class="f-naver" data-idx="${idx}" data-f="naverUrl" value="${s.naverUrl||''}" placeholder="네이버 URL">
       </div>
+      <div class="store-line">
+        <input class="f-link" data-linkidx="${idx}" value="${storeLinkUrl(s.id)}" readonly>
+        <button class="btn-ghost" data-copylink="${idx}">🔗 링크 복사</button>
+      </div>
     `;
     tbody.appendChild(card);
   });
@@ -369,6 +382,18 @@ function renderStores(){
   });
   tbody.querySelectorAll('[data-imgidx]').forEach(inp => {
     inp.onchange = () => handleImageSelect(inp);
+  });
+  tbody.querySelectorAll('[data-copylink]').forEach(btn => {
+    btn.onclick = async () => {
+      const idx = Number(btn.dataset.copylink);
+      const url = storeLinkUrl(data.stores[idx].id);
+      try {
+        await navigator.clipboard.writeText(url);
+        setStatus(`"${data.stores[idx].name}" 링크를 복사했습니다`, 'ok');
+      } catch (e) {
+        setStatus('클립보드 복사 실패 - 링크 입력창에서 직접 선택해 복사해주세요', 'err');
+      }
+    };
   });
   tbody.querySelectorAll('[data-del]').forEach(btn => {
     btn.onclick = () => {
