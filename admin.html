@@ -57,23 +57,26 @@
     position:absolute;top:8px;left:8px;background:rgba(43,38,32,.75);color:#fff;font-size:11px;
     padding:3px 8px;border-radius:6px;pointer-events:none;display:none;
   }
-  .img-cell{display:flex;align-items:center;gap:8px;}
+  .img-cell{display:flex;align-items:center;gap:8px;flex:1.4;min-width:220px;}
   .img-cell img.thumb{width:40px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line);flex:none;}
-  .img-cell input[type=file]{font-size:11px;width:110px;}
-  .img-cell .hint{font-size:10px;line-height:1.35;color:var(--ink-soft);}
+  .img-cell input[type=file]{font-size:11px;flex:1;min-width:110px;}
+  .img-cell .hint{font-size:10px;line-height:1.35;color:var(--ink-soft);flex:none;}
 
   .store-card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fffdf8;}
   .store-card.target{outline:2px solid var(--accent);}
   .store-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .store-line + .store-line{margin-top:8px;}
-  .store-line .f-name{flex:1.3;min-width:110px;}
-  .store-line .f-cat{flex:none;width:100px;}
-  .store-line .f-x, .store-line .f-y{flex:none;width:60px;}
-  .store-line .f-phone{flex:none;width:120px;}
-  .store-line .f-desc{flex:1.6;min-width:140px;}
-  .store-line .f-naver{flex:1;min-width:120px;}
-  .store-line .btn-ghost, .store-line .btn-danger{flex:none;padding:8px 12px;font-size:12px;}
-  .store-line input, .store-line select{width:100%;}
+  .store-line .f-name{flex:1.6;min-width:150px;}
+  .store-line .f-cat{flex:1;min-width:100px;}
+  .store-line .f-x, .store-line .f-y{flex:none;width:64px;}
+  .store-line .f-phone{flex:1;min-width:130px;}
+  .store-line .f-desc{flex:2;min-width:200px;}
+  .store-line .f-naver{flex:1.4;min-width:160px;}
+  .store-line .btn-ghost, .store-line .btn-danger{flex:none;padding:8px 12px;font-size:12px;white-space:nowrap;}
+  .store-line input, .store-line select{width:100%;box-sizing:border-box;}
+  .store-line input[type=number]{-moz-appearance:textfield;}
+  .store-line input[type=number]::-webkit-inner-spin-button,
+  .store-line input[type=number]::-webkit-outer-spin-button{margin:0;}
 </style>
 </head>
 <body>
