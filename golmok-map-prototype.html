@@ -176,90 +176,36 @@
 
 <script>
 /* =========================================================
-   1) 카테고리 & 컬러
+   0) 데이터 로드 (data.json — 관리자 페이지에서 편집)
 ========================================================= */
-const CATS = [
-  {id:'sport',  label:'스포츠',   color:'#3f8a6b', tint:'#e3efe8'},
-  {id:'outdoor',label:'아웃도어', color:'#4c86b8', tint:'#e1edf5'},
-  {id:'golf',   label:'골프',     color:'#c99a2e', tint:'#f6eed3'},
-  {id:'fashion',label:'패션잡화', color:'#c65b3f', tint:'#f6e5dd'},
-];
-const catMap = Object.fromEntries(CATS.map(c=>[c.id,c]));
+let CATS, catMap, IMG_W, IMG_H, STORES, illustrationURL;
+let map, markers = {};
 
-/* =========================================================
-   2) 배경 지도 이미지 크기 — 사용자가 준비해주신 일러스트 원본 그대로
-========================================================= */
-const IMG_W = 460, IMG_H = 1024;
+fetch('data.json?_=' + Date.now())
+  .then(res => res.json())
+  .then(data => {
+    CATS = data.categories;
+    catMap = Object.fromEntries(CATS.map(c=>[c.id,c]));
+    IMG_W = data.imageSize.w;
+    IMG_H = data.imageSize.h;
+    illustrationURL = data.illustrationURL;
+    STORES = data.stores.map(s => ({...s, catLabel: catMap[s.cat].label}));
+    init();
+  })
+  .catch(err => {
+    document.getElementById('emptyState').textContent = '데이터를 불러오지 못했습니다';
+    document.getElementById('emptyState').style.display = 'block';
+    console.error(err);
+  });
 
-/* =========================================================
-   3) 실제 점포 데이터 (신천패션타운 상권)
-   좌표는 제공해주신 일러스트 이미지와 실제 지도를 구간별로 정밀 대조하여
-   각 점포 아이콘 위치를 직접 확인해 잡은 값입니다.
-   전화번호/대표상품/네이버링크는 임시값이며 실데이터로 교체해주세요.
-   카테고리는 브랜드 특성상 추정치입니다.
-========================================================= */
-const RAW_STORES = [
-  ['다이나핏',            'sport',   325, 178],
-  ['코오롱스포츠',         'sport',   313, 240],
-  ['페리미츠 시흥점',      'fashion', 294, 143],
-  ['스케처스',            'sport',   239, 225],
-  ['뉴발란스',            'sport',   285, 342],
-  ['나이키',              'sport',   271, 386],
-  ['라이프워크',          'sport',   247, 459],
-  ['지센',                'sport',   232, 525],
-  ['데상트',              'sport',   219, 589],
-  ['해지스골프 시흥신천점', 'golf',    246, 297],
-  ['미즈노',              'sport',   232, 344],
-  ['마운티아',            'outdoor', 238, 365],
-  ['STCO',                'fashion', 202, 389],
-  ['벤제프',              'fashion', 202, 429],
-  ['팜스프링스',          'golf',    189, 463],
-  ['신천패션타운',        'fashion', 161, 381],
-  ['캠프라인',            'outdoor', 165, 255],
-  ['바쏘',                'fashion', 113, 218],
-  ['레노마',              'fashion', 128, 410],
-  ['아레나',              'fashion', 126, 440],
-  ['팬텀 신천점',         'fashion', 141, 475],
-  ['루이까스텔',          'fashion', 195, 437],
-  ['MLB',                 'sport',  238, 504],
-  ['디스커버리',          'outdoor',159, 559],
-  ['마코',                'fashion', 238, 455],
-  ['JDX',                 'golf',   222, 542],
-  ['블랙인화이트',        'fashion', 66, 693],
-  ['몰포유',              'fashion', 123, 655],
-  ['파크랜드',            'fashion', 183, 737],
-  ['PAT',                 'fashion', 173, 642],
-  ['마레몬떼',            'fashion', 135, 724],
-  ['뱅뱅',                'fashion', 99, 985],
-  ['노스페이스',          'outdoor',105, 1010],
-  ['골프도중고골프',      'golf',   340, 84],
-  ['제이케이종합상사',    'fashion', 260, 54],
-];
-
-const STORES = RAW_STORES.map(([name, cat, x, y], i) => {
-  return {
-    id: 'store-' + i,
-    name,
-    cat,
-    catLabel: catMap[cat].label,
-    x, y,
-    phone: `031-${400+ (i%9)}-${1000 + i*13 % 8999}`,   // 임시값 — 실데이터로 교체
-    products: ['대표 상품 준비중'],                         // 임시값 — 실데이터로 교체
-    naverUrl: '#'                                          // 임시값 — 실제 네이버플레이스 링크로 교체
-  };
-});
-
-/* =========================================================
-   4) 배경 지도 이미지 — 사용자가 준비해주신 일러스트 원본
-========================================================= */
-const illustrationURL = 'map-illustration.png';
+function init(){
 
 /* =========================================================
    5) Leaflet CRS.Simple 지도 초기화
 ========================================================= */
 const bounds = [[0,0],[IMG_H, IMG_W]];
 
-const map = L.map('map', {
+map = L.map('map', {
   crs: L.CRS.Simple,
   minZoom: -2,
   maxZoom: 4,
@@ -280,7 +226,6 @@ function toLatLng(x,y){ return L.latLng(IMG_H - y, x); }
 /* =========================================================
    5) 마커 생성
 ========================================================= */
-const markers = {};
 STORES.forEach(store=>{
   const color = catMap[store.cat].color;
   const icon = L.divIcon({
@@ -434,6 +379,8 @@ sheetBackdrop.onclick = closeSheetFn;
 
 /* 초기 칩 렌더 */
 renderChips();
+
+} // end init()
 </script>
 </body>
 </html>
