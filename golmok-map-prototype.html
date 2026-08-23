@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>그랑트리 골목상권 지도</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+  :root{
+    --paper:#f6f1e6;
+    --ink:#2b2620;
+    --ink-soft:#6b6255;
+    --line:#d8cfb8;
+    --accent:#c65b3f;      /* 남성복 */
+    --accent-2:#8a6fae;    /* 여성복 */
+    --accent-3:#3f8a6b;    /* 스포츠 */
+    --accent-4:#c99a2e;    /* 잡화/기타 */
+    --card:#fffdf8;
+    --shadow: 0 8px 24px rgba(43,38,32,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:var(--paper);color:var(--ink);overscroll-behavior:none;}
+  #app{position:relative;width:100vw;height:100vh;overflow:hidden;}
+
+  /* ---------- 상단 검색/필터 ---------- */
+  #topbar{
+    position:absolute;top:0;left:0;right:0;z-index:1000;
+    padding:12px 12px 10px;
+    background:linear-gradient(180deg, rgba(246,241,230,0.97) 0%, rgba(246,241,230,0.88) 70%, rgba(246,241,230,0) 100%);
+  }
+  .brand{
+    font-size:12px;letter-spacing:0.14em;color:var(--ink-soft);font-weight:600;margin:2px 4px 8px;
+    text-transform:uppercase;
+  }
+  #searchRow{
+    display:flex;align-items:center;gap:8px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:10px 12px;box-shadow:var(--shadow);
+  }
+  #searchRow svg{flex:none;color:var(--ink-soft);}
+  #searchInput{
+    flex:1;border:none;outline:none;background:transparent;
+    font-size:16px;color:var(--ink);font-family:inherit;
+  }
+  #searchInput::placeholder{color:#a89d89;}
+  #clearBtn{
+    display:none;border:none;background:#efe7d5;color:var(--ink-soft);
+    width:24px;height:24px;border-radius:50%;font-size:14px;line-height:1;cursor:pointer;flex:none;
+  }
+  #chips{
+    display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;
+    -ms-overflow-style:none;scrollbar-width:none;
+  }
+  #chips::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:none;font-size:13px;font-weight:600;color:var(--ink-soft);
+    background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:7px 13px;cursor:pointer;white-space:nowrap;transition:all .15s ease;
+  }
+  .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  #resultCount{
+    font-size:12px;color:var(--ink-soft);margin:8px 4px 0;min-height:16px;
+  }
+
+  /* ---------- 지도 ---------- */
+  #map{position:absolute;inset:0;background:var(--paper);}
+  .leaflet-control-zoom{display:none;} /* 커스텀 줌 버튼 사용 */
+  #zoomCtrl{
+    position:absolute;right:12px;bottom:100px;z-index:900;
+    display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;overflow:hidden;box-shadow:var(--shadow);
+  }
+  #zoomCtrl button{
+    width:42px;height:42px;border:none;background:transparent;font-size:20px;color:var(--ink);cursor:pointer;
+  }
+  #zoomCtrl button:first-child{border-bottom:1px solid var(--line);}
+
+  .store-pin{
+    display:flex;flex-direction:column;align-items:center;cursor:pointer;
+    transform-origin:bottom center;
+  }
+  .pin-dot{
+    width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    border:2px solid var(--card);box-shadow:0 2px 6px rgba(0,0,0,0.25);
+  }
+  .pin-dot span{
+    display:block;transform:rotate(45deg);width:100%;height:100%;
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;
+  }
+  .store-pin.selected .pin-dot{width:32px;height:32px;box-shadow:0 4px 10px rgba(0,0,0,0.35);}
+  .pin-label{
+    margin-top:2px;font-size:10px;font-weight:700;color:var(--ink);
+    background:rgba(255,253,248,0.9);padding:1px 5px;border-radius:5px;
+    white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.12);
+  }
+
+  /* ---------- 바텀시트 ---------- */
+  #sheetBackdrop{
+    position:absolute;inset:0;background:rgba(43,38,32,0.35);z-index:1400;
+    opacity:0;pointer-events:none;transition:opacity .25s ease;
+  }
+  #sheetBackdrop.show{opacity:1;pointer-events:auto;}
+  #sheet{
+    position:absolute;left:0;right:0;bottom:0;z-index:1500;
+    background:var(--card);border-radius:20px 20px 0 0;
+    box-shadow:0 -10px 30px rgba(0,0,0,0.25);
+    transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);
+    max-height:72vh;display:flex;flex-direction:column;
+  }
+  #sheet.show{transform:translateY(0);}
+  .sheet-handle{width:36px;height:4px;background:var(--line);border-radius:2px;margin:10px auto 4px;flex:none;}
+  .sheet-body{overflow-y:auto;padding:6px 20px 24px;}
+  .sheet-top{display:flex;gap:12px;align-items:flex-start;margin-top:6px;}
+  .sheet-photo{
+    width:64px;height:64px;border-radius:14px;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:22px;font-weight:700;
+  }
+  .sheet-cat{font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:2px;}
+  .sheet-name{font-size:19px;font-weight:800;color:var(--ink);line-height:1.3;}
+  .sheet-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+  .sheet-tag{font-size:11px;background:#efe7d5;color:var(--ink-soft);padding:3px 8px;border-radius:999px;}
+  .sheet-info{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;}
+  .info-row{display:flex;gap:10px;font-size:14px;color:var(--ink);padding:6px 0;align-items:flex-start;}
+  .info-row .k{flex:none;width:64px;color:var(--ink-soft);font-weight:600;}
+  .sheet-actions{display:flex;gap:8px;margin-top:16px;}
+  .btn{
+    flex:1;text-align:center;padding:12px;border-radius:12px;font-weight:700;font-size:14px;
+    border:none;cursor:pointer;text-decoration:none;display:block;
+  }
+  .btn-primary{background:var(--ink);color:var(--paper);}
+  .btn-secondary{background:#efe7d5;color:var(--ink);}
+  #closeSheet{
+    position:absolute;top:10px;right:14px;border:none;background:none;font-size:20px;color:var(--ink-soft);cursor:pointer;
+  }
+
+  #emptyState{
+    position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);z-index:900;
+    text-align:center;color:var(--ink-soft);font-size:13px;background:var(--card);
+    padding:14px 20px;border-radius:12px;box-shadow:var(--shadow);display:none;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="topbar">
+    <div class="brand">신천패션타운 · 골목상권 지도</div>
+    <div id="searchRow">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="searchInput" type="text" placeholder="점포명 또는 카테고리 검색" autocomplete="off">
+      <button id="clearBtn">✕</button>
+    </div>
+    <div id="chips"></div>
+    <div id="resultCount"></div>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="zoomCtrl">
+    <button id="zoomIn">+</button>
+    <button id="zoomOut">−</button>
+  </div>
+
+  <div id="emptyState">검색 결과가 없습니다</div>
+
+  <div id="sheetBackdrop"></div>
+  <div id="sheet">
+    <button id="closeSheet">✕</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   1) 카테고리 & 컬러
+========================================================= */
+const CATS = [
+  {id:'sport',  label:'스포츠',   color:'#3f8a6b', tint:'#e3efe8'},
+  {id:'outdoor',label:'아웃도어', color:'#4c86b8', tint:'#e1edf5'},
+  {id:'golf',   label:'골프',     color:'#c99a2e', tint:'#f6eed3'},
+  {id:'fashion',label:'패션잡화', color:'#c65b3f', tint:'#f6e5dd'},
+];
+const catMap = Object.fromEntries(CATS.map(c=>[c.id,c]));
+
+/* =========================================================
+   2) 배경 지도 이미지 크기 — 사용자가 준비해주신 일러스트 원본 그대로
+========================================================= */
+const IMG_W = 460, IMG_H = 1024;
+
+/* =========================================================
+   3) 실제 점포 데이터 (신천패션타운 상권)
+   좌표는 제공해주신 일러스트 이미지와 실제 지도를 구간별로 정밀 대조하여
+   각 점포 아이콘 위치를 직접 확인해 잡은 값입니다.
+   전화번호/대표상품/네이버링크는 임시값이며 실데이터로 교체해주세요.
+   카테고리는 브랜드 특성상 추정치입니다.
+========================================================= */
+const RAW_STORES = [
+  ['다이나핏',            'sport',   325, 178],
+  ['코오롱스포츠',         'sport',   313, 240],
+  ['페리미츠 시흥점',      'fashion', 294, 143],
+  ['스케처스',            'sport',   239, 225],
+  ['뉴발란스',            'sport',   285, 342],
+  ['나이키',              'sport',   271, 386],
+  ['라이프워크',          'sport',   247, 459],
+  ['지센',                'sport',   232, 525],
+  ['데상트',              'sport',   219, 589],
+  ['해지스골프 시흥신천점', 'golf',    246, 297],
+  ['미즈노',              'sport',   232, 344],
+  ['마운티아',            'outdoor', 238, 365],
+  ['STCO',                'fashion', 202, 389],
+  ['벤제프',              'fashion', 202, 429],
+  ['팜스프링스',          'golf',    189, 463],
+  ['신천패션타운',        'fashion', 161, 381],
+  ['캠프라인',            'outdoor', 165, 255],
+  ['바쏘',                'fashion', 113, 218],
+  ['레노마',              'fashion', 128, 410],
+  ['아레나',              'fashion', 126, 440],
+  ['팬텀 신천점',         'fashion', 141, 475],
+  ['루이까스텔',          'fashion', 195, 437],
+  ['MLB',                 'sport',  238, 504],
+  ['디스커버리',          'outdoor',159, 559],
+  ['마코',                'fashion', 238, 455],
+  ['JDX',                 'golf',   222, 542],
+  ['블랙인화이트',        'fashion', 66, 693],
+  ['몰포유',              'fashion', 123, 655],
+  ['파크랜드',            'fashion', 183, 737],
+  ['PAT',                 'fashion', 173, 642],
+  ['마레몬떼',            'fashion', 135, 724],
+  ['뱅뱅',                'fashion', 99, 985],
+  ['노스페이스',          'outdoor',105, 1010],
+  ['골프도중고골프',      'golf',   340, 84],
+  ['제이케이종합상사',    'fashion', 260, 54],
+];
+
+const STORES = RAW_STORES.map(([name, cat, x, y], i) => {
+  return {
+    id: 'store-' + i,
+    name,
+    cat,
+    catLabel: catMap[cat].label,
+    x, y,
+    phone: `031-${400+ (i%9)}-${1000 + i*13 % 8999}`,   // 임시값 — 실데이터로 교체
+    products: ['대표 상품 준비중'],                         // 임시값 — 실데이터로 교체
+    naverUrl: '#'                                          // 임시값 — 실제 네이버플레이스 링크로 교체
+  };
+});
+
+/* =========================================================
+   4) 배경 지도 이미지 — 사용자가 준비해주신 일러스트 원본
+========================================================= */
+const illustrationURL = 'map-illustration.png';
+
+/* =========================================================
+   5) Leaflet CRS.Simple 지도 초기화
+========================================================= */
+const bounds = [[0,0],[IMG_H, IMG_W]];
+
+const map = L.map('map', {
+  crs: L.CRS.Simple,
+  minZoom: -2,
+  maxZoom: 4,
+  zoomSnap: 0.25,
+  attributionControl:false,
+  maxBounds: [[-150, -150],[IMG_H+150, IMG_W+150]],
+  maxBoundsViscosity: 0.6
+});
+L.imageOverlay(illustrationURL, bounds).addTo(map);
+map.fitBounds(bounds, {padding:[10,10]});
+
+document.getElementById('zoomIn').onclick = ()=> map.zoomIn();
+document.getElementById('zoomOut').onclick = ()=> map.zoomOut();
+
+/* 좌표 변환: 우리가 만든 x,y(이미지 픽셀) -> leaflet latlng */
+function toLatLng(x,y){ return L.latLng(IMG_H - y, x); }
+
+/* =========================================================
+   5) 마커 생성
+========================================================= */
+const markers = {};
+STORES.forEach(store=>{
+  const color = catMap[store.cat].color;
+  const icon = L.divIcon({
+    className:'',
+    html:`<div class="store-pin" id="pin-${store.id}">
+            <div class="pin-dot" style="background:${color}"><span>${store.catLabel[0]}</span></div>
+            <div class="pin-label">${store.name}</div>
+          </div>`,
+    iconSize:[1,1],
+    iconAnchor:[13,32]
+  });
+  const marker = L.marker(toLatLng(store.x, store.y), {icon}).addTo(map);
+  marker.on('click', ()=> selectStore(store.id, true));
+  markers[store.id] = marker;
+});
+
+/* =========================================================
+   6) 검색 & 필터
+========================================================= */
+const searchInput = document.getElementById('searchInput');
+const clearBtn = document.getElementById('clearBtn');
+const chipsEl = document.getElementById('chips');
+const resultCountEl = document.getElementById('resultCount');
+const emptyStateEl = document.getElementById('emptyState');
+
+let activeCat = null;
+
+const allChip = document.createElement('div');
+allChip.className='chip active';
+allChip.textContent='전체';
+allChip.onclick = ()=>{ activeCat=null; renderChips(); applyFilter(); };
+chipsEl.appendChild(allChip);
+
+CATS.forEach(c=>{
+  const chip = document.createElement('div');
+  chip.className='chip';
+  chip.textContent=c.label;
+  chip.dataset.cat=c.id;
+  chip.onclick = ()=>{ activeCat = (activeCat===c.id) ? null : c.id; renderChips(); applyFilter(); };
+  chipsEl.appendChild(chip);
+});
+
+function renderChips(){
+  [...chipsEl.children].forEach(ch=>{
+    if(ch===allChip){ ch.classList.toggle('active', activeCat===null); }
+    else { ch.classList.toggle('active', ch.dataset.cat===activeCat); }
+  });
+}
+
+function applyFilter(){
+  const q = searchInput.value.trim().toLowerCase();
+  clearBtn.style.display = q ? 'block' : 'none';
+
+  let visibleCount = 0;
+  STORES.forEach(store=>{
+    const matchesCat = !activeCat || store.cat===activeCat;
+    const matchesQuery = !q || store.name.toLowerCase().includes(q) || store.catLabel.toLowerCase().includes(q);
+    const visible = matchesCat && matchesQuery;
+    const pinEl = document.getElementById('pin-'+store.id);
+    if(pinEl){ pinEl.style.display = visible ? 'flex' : 'none'; }
+    if(visible) visibleCount++;
+  });
+
+  if(q || activeCat){
+    resultCountEl.textContent = `${visibleCount}개 점포`;
+  } else {
+    resultCountEl.textContent = '';
+  }
+  emptyStateEl.style.display = (visibleCount===0) ? 'block' : 'none';
+
+  // 검색어로 결과가 1개면 자동 포커스
+  if(q && visibleCount>=1){
+    const first = STORES.find(s=>{
+      const matchesCat = !activeCat || s.cat===activeCat;
+      const matchesQuery = s.name.toLowerCase().includes(q) || s.catLabel.toLowerCase().includes(q);
+      return matchesCat && matchesQuery;
+    });
+    if(first) focusStore(first.id);
+  }
+}
+
+searchInput.addEventListener('input', applyFilter);
+clearBtn.addEventListener('click', ()=>{ searchInput.value=''; applyFilter(); searchInput.focus(); });
+
+/* =========================================================
+   7) 핀 포커스 이동 + 바텀시트
+========================================================= */
+let selectedId = null;
+
+function focusStore(id){
+  const store = STORES.find(s=>s.id===id);
+  if(!store) return;
+  map.flyTo(toLatLng(store.x, store.y), Math.max(map.getZoom(), 1.5), {duration:0.6});
+}
+
+function selectStore(id, doFocus){
+  if(selectedId){
+    const prevEl = document.getElementById('pin-'+selectedId);
+    if(prevEl) prevEl.classList.remove('selected');
+  }
+  selectedId = id;
+  const el = document.getElementById('pin-'+id);
+  if(el) el.classList.add('selected');
+  if(doFocus) focusStore(id);
+  openSheet(id);
+}
+
+const sheet = document.getElementById('sheet');
+const sheetBackdrop = document.getElementById('sheetBackdrop');
+const sheetBody = document.getElementById('sheetBody');
+
+function openSheet(id){
+  const store = STORES.find(s=>s.id===id);
+  if(!store) return;
+  const color = catMap[store.cat].color;
+  sheetBody.innerHTML = `
+    <div class="sheet-top">
+      <div class="sheet-photo" style="background:${color}">${store.name[0]}</div>
+      <div>
+        <div class="sheet-cat">${store.catLabel}</div>
+        <div class="sheet-name">${store.name}</div>
+        <div class="sheet-tags">
+          ${store.products.map(p=>`<span class="sheet-tag">${p}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="sheet-info">
+      <div class="info-row"><div class="k">전화</div><div>${store.phone}</div></div>
+      <div class="info-row"><div class="k">대표상품</div><div>${store.products.join(', ')}</div></div>
+    </div>
+    <div class="sheet-actions">
+      <a class="btn btn-secondary" href="tel:${store.phone}">전화하기</a>
+      <a class="btn btn-primary" href="${store.naverUrl}" target="_blank" rel="noopener">네이버플레이스 길찾기</a>
+    </div>
+  `;
+  sheet.classList.add('show');
+  sheetBackdrop.classList.add('show');
+}
+
+function closeSheetFn(){
+  sheet.classList.remove('show');
+  sheetBackdrop.classList.remove('show');
+  if(selectedId){
+    const el = document.getElementById('pin-'+selectedId);
+    if(el) el.classList.remove('selected');
+  }
+  selectedId = null;
+}
+document.getElementById('closeSheet').onclick = closeSheetFn;
+sheetBackdrop.onclick = closeSheetFn;
+
+/* 초기 칩 렌더 */
+renderChips();
+</script>
+</body>
+</html>
