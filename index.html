@@ -207,19 +207,28 @@
   .store-gallery .photo-trigger{flex:none;max-width:90%;border-radius:8px;overflow:hidden;scroll-snap-align:start}
   .store-gallery img{display:block;height:clamp(135px,22vh,205px);max-width:100%;object-fit:contain}
   #photoViewer{
+    --photo-controls:76px;
     width:min(960px,calc(100% - 24px));max-width:none;max-height:none;
     border:0;margin:auto;padding:0;background:transparent;overflow:visible;
   }
+  #photoViewer.has-gallery{--photo-controls:128px}
   #photoViewer::backdrop{background:#1c1917f5}
-  #photoViewerClose{
-    display:block;margin:0 0 8px auto;min-height:44px;padding:0 14px;
+  #photoViewer button{
+    min-height:44px;padding:0 14px;
     border:1px solid #ffffff4d;border-radius:10px;background:#332e2a;color:#fff;
     font:inherit;font-size:14px;font-weight:700;cursor:pointer;
   }
+  #photoViewerClose{display:block;margin:0 0 8px auto}
   #photoViewerImage{
-    display:block;max-width:100%;max-height:calc(100vh - 76px);
-    max-height:calc(100dvh - 76px);margin:0 auto;border-radius:8px;object-fit:contain;
+    display:block;max-width:100%;max-height:calc(100vh - var(--photo-controls));
+    max-height:calc(100dvh - var(--photo-controls));margin:0 auto;border-radius:8px;object-fit:contain;
   }
+  #photoViewer.has-gallery #photoViewerImage{touch-action:pan-y pinch-zoom}
+  #photoViewerNav:not([hidden]){
+    display:flex;align-items:center;justify-content:center;gap:16px;margin-top:8px;
+    color:#fff;font-size:14px;
+  }
+  #photoViewerCount{min-width:5ch;text-align:center;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -261,7 +270,12 @@
   </div>
   <dialog id="photoViewer" aria-label="매장 사진 크게 보기">
     <button type="button" id="photoViewerClose" autofocus>닫기 ✕</button>
-    <img id="photoViewerImage" alt="">
+    <img id="photoViewerImage" alt="" draggable="false">
+    <div id="photoViewerNav" role="group" aria-label="사진 넘기기" hidden>
+      <button type="button" id="photoPrev">‹ 이전</button>
+      <output id="photoViewerCount"></output>
+      <button type="button" id="photoNext">다음 ›</button>
+    </div>
   </dialog>
 
 </div>
@@ -561,19 +575,57 @@ const sheetBackdrop = document.getElementById('sheetBackdrop');
 const sheetBody = document.getElementById('sheetBody');
 const photoViewer = document.getElementById('photoViewer');
 const photoViewerImage = document.getElementById('photoViewerImage');
+const photoViewerNav = document.getElementById('photoViewerNav');
+const photoViewerCount = document.getElementById('photoViewerCount');
+let viewerPhotos = [];
+let viewerIndex = 0;
+let swipeStart = null;
+
+function showViewerPhoto(index){
+  viewerIndex = (index + viewerPhotos.length) % viewerPhotos.length;
+  const photo = viewerPhotos[viewerIndex];
+  photoViewerImage.src = photo.currentSrc || photo.src;
+  photoViewerImage.alt = photo.alt;
+  photoViewerCount.textContent = `${viewerIndex+1} / ${viewerPhotos.length}`;
+}
 
 sheetBody.addEventListener('click', event => {
   const thumbnail = event.target.closest('.photo-trigger')?.querySelector('img');
   if (!thumbnail || photoViewer.open) return;
-  photoViewerImage.src = thumbnail.currentSrc || thumbnail.src;
-  photoViewerImage.alt = thumbnail.alt;
+  viewerPhotos = [...sheetBody.querySelectorAll('.photo-trigger img')];
+  photoViewerNav.hidden = viewerPhotos.length < 2;
+  photoViewer.classList.toggle('has-gallery', !photoViewerNav.hidden);
+  showViewerPhoto(viewerPhotos.indexOf(thumbnail));
   photoViewer.showModal();
 });
 document.getElementById('photoViewerClose').onclick = () => photoViewer.close();
+document.getElementById('photoPrev').onclick = () => showViewerPhoto(viewerIndex - 1);
+document.getElementById('photoNext').onclick = () => showViewerPhoto(viewerIndex + 1);
+photoViewer.addEventListener('keydown', event => {
+  if (viewerPhotos.length < 2 || !['ArrowLeft','ArrowRight'].includes(event.key)) return;
+  event.preventDefault();
+  showViewerPhoto(viewerIndex + (event.key === 'ArrowLeft' ? -1 : 1));
+});
+photoViewerImage.addEventListener('pointerdown', event => {
+  if (!event.isPrimary || event.pointerType !== 'touch' || viewerPhotos.length < 2) return;
+  swipeStart = {id:event.pointerId,x:event.clientX,y:event.clientY};
+});
+photoViewerImage.addEventListener('pointerup', event => {
+  if (swipeStart?.id !== event.pointerId) return;
+  const dx = event.clientX - swipeStart.x;
+  const dy = event.clientY - swipeStart.y;
+  swipeStart = null;
+  if (Math.abs(dx) >= 45 && Math.abs(dx) > Math.abs(dy)*1.3) {
+    showViewerPhoto(viewerIndex + (dx < 0 ? 1 : -1));
+  }
+});
+photoViewerImage.addEventListener('pointercancel', () => { swipeStart = null; });
 photoViewer.addEventListener('click', event => {
   if (event.target === photoViewer) photoViewer.close();
 });
 photoViewer.addEventListener('close', () => {
+  swipeStart = null;
+  viewerPhotos = [];
   photoViewerImage.removeAttribute('src');
   photoViewerImage.alt = '';
 });
