@@ -192,52 +192,52 @@
       "id": "store-22",
       "name": "MLB",
       "cat": "sport",
-      "x": 601,
+      "x": 603,
       "y": 876,
       "phone": "",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/1129541872",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3413번길 4",
       "hours": "",
-      "positionSource": "address"
+      "positionSource": "naver"
     },
     {
       "id": "store-1",
       "name": "코오롱스포츠",
       "cat": "outdoor",
-      "x": 658,
+      "x": 663,
       "y": 725,
       "phone": "",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/1166246144",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 2",
       "hours": "",
-      "positionSource": "address"
+      "positionSource": "naver"
     },
     {
       "id": "store-8",
       "name": "데상트",
       "cat": "sport",
-      "x": 622,
+      "x": 626,
       "y": 873,
       "phone": "",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/1023693123",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로 3417",
       "hours": "",
-      "positionSource": "address"
+      "positionSource": "naver"
     },
     {
       "id": "store-3",
       "name": "스케쳐스",
       "cat": "sport",
-      "x": 630,
+      "x": 633,
       "y": 713,
       "phone": "031-313-0993",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/1857360121",
       "description": "편안한 신발과 의류를 판매합니다.",
       "image": "store-photos/store-3-1.webp",
       "address": "경기도 시흥시 수인로3427번길 4",
@@ -246,26 +246,26 @@
         "store-photos/store-3-2.webp",
         "store-photos/store-3-3.webp"
       ],
-      "positionSource": "address"
+      "positionSource": "naver"
     },
     {
       "id": "store-11",
       "name": "마운티아",
       "cat": "outdoor",
-      "x": 618,
+      "x": 620,
       "y": 753,
       "phone": "",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/1899248980",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 3-2",
       "hours": "",
-      "positionSource": "address"
+      "positionSource": "naver"
     },
     {
       "id": "store-38",
-      "x": null,
-      "y": null,
+      "x": 609,
+      "y": 726,
       "name": "트렉스타",
       "cat": "outdoor",
       "address": "경기도 시흥시 수인로3427번길 6",
@@ -273,7 +273,8 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "https://map.naver.com/p/entry/place/1996964392",
+      "positionSource": "naver"
     },
     {
       "id": "store-25",
@@ -282,12 +283,12 @@
       "x": 582,
       "y": 884,
       "phone": "",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/1205300624",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3413번길 4-1",
       "hours": "",
-      "positionSource": "address"
+      "positionSource": "naver"
     },
     {
       "id": "store-20",
@@ -296,21 +297,21 @@
       "x": 591,
       "y": 824,
       "phone": "",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/1224730965",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 9-6",
       "hours": "",
-      "positionSource": "address"
+      "positionSource": "naver"
     },
     {
       "id": "store-21",
       "name": "루이까스텔",
       "cat": "golf",
-      "x": 595,
+      "x": 596,
       "y": 854,
       "phone": "031-313-8167",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/2031767320",
       "description": "평상복으로도 입을 수 있는 남녀 골프 의류와 액세서리를 판매합니다.",
       "image": "store-photos/store-21-1.webp",
       "address": "경기도 시흥시 수인로3427번길 9-8",
@@ -322,7 +323,7 @@
         "store-photos/store-21-5.webp",
         "store-photos/store-21-6.webp"
       ],
-      "positionSource": "address"
+      "positionSource": "naver"
     },
     {
       "id": "store-39",
@@ -340,8 +341,8 @@
     },
     {
       "id": "store-40",
-      "x": 582,
-      "y": 946,
+      "x": 584,
+      "y": 937,
       "name": "웰메이드",
       "cat": "fashion",
       "address": "경기도 시흥시 수인로3413번길 3",
@@ -349,12 +350,12 @@
       "hours": "10:00~20:00 · 연중무휴",
       "description": "남성 정장과 와이셔츠부터 점퍼, 남녀 캐주얼까지 한곳에서 고를 수 있습니다.",
       "image": "store-photos/store-40-1.webp",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/1843530534",
       "gallery": [
         "store-photos/store-40-2.webp",
         "store-photos/store-40-3.webp"
       ],
-      "positionSource": "address"
+      "positionSource": "naver"
     },
     {
       "id": "store-12",
@@ -372,8 +373,8 @@
     },
     {
       "id": "store-41",
-      "x": null,
-      "y": null,
+      "x": 656,
+      "y": 754,
       "name": "내셔널지오그래픽",
       "cat": "outdoor",
       "address": "경기도 시흥시 수인로 3425",
@@ -381,7 +382,8 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "https://map.naver.com/p/entry/place/1516888306",
+      "positionSource": "naver"
     },
     {
       "id": "store-30",
@@ -399,8 +401,8 @@
     },
     {
       "id": "store-42",
-      "x": null,
-      "y": null,
+      "x": 600,
+      "y": 728,
       "name": "르꼬끄스포르티브",
       "cat": "sport",
       "address": "경기도 시흥시 수인로3427번길 6",
@@ -408,7 +410,8 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "https://map.naver.com/p/entry/place/1610959580",
+      "positionSource": "naver"
     },
     {
       "id": "store-43",
@@ -515,8 +518,8 @@
     },
     {
       "id": "store-47",
-      "x": null,
-      "y": null,
+      "x": 599,
+      "y": 784,
       "name": "퓨마",
       "cat": "sport",
       "address": "경기도 시흥시 수인로3427번길 9-3",
@@ -524,7 +527,8 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "https://map.naver.com/p/entry/place/1415161259",
+      "positionSource": "naver"
     },
     {
       "id": "store-29",
@@ -577,14 +581,15 @@
       "id": "store-4",
       "name": "뉴발란스",
       "cat": "sport",
-      "x": null,
-      "y": null,
+      "x": 653,
+      "y": 765,
       "phone": "",
-      "naverUrl": "",
+      "naverUrl": "https://map.naver.com/p/entry/place/1828284488",
       "description": "",
       "image": "",
-      "address": "경기도 시흥시 수인로 3425번길(신천동)",
-      "hours": ""
+      "address": "경기도 시흥시 수인로 3425",
+      "hours": "",
+      "positionSource": "naver"
     },
     {
       "id": "store-6",
@@ -679,8 +684,8 @@
     },
     {
       "id": "store-52",
-      "x": null,
-      "y": null,
+      "x": 666,
+      "y": 693,
       "name": "아이더",
       "cat": "outdoor",
       "address": "경기도 시흥시 수인로 3427번길 2-1",
@@ -688,7 +693,8 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "https://map.naver.com/p/entry/place/2042706585",
+      "positionSource": "naver"
     },
     {
       "id": "store-32",
