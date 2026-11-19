@@ -485,6 +485,9 @@ function openSheet(id){
   const store = STORES.find(s=>s.id===id);
   if(!store) return;
   const color = catMap[store.cat].color;
+  const placeUrl = store.naverUrl && store.naverUrl !== '#' ? store.naverUrl : '';
+  const searchUrl = 'https://map.naver.com/p/search/' +
+    encodeURIComponent([store.name, store.address].filter(Boolean).join(' '));
   const photoContent = store.image
     ? `<img src="${store.image}" alt="${store.name}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">`
     : store.name[0];
@@ -503,7 +506,7 @@ function openSheet(id){
     ${store.gallery?.length ? `<div class="store-gallery" aria-label="매장 사진">${store.gallery.map((src,i)=>`<img src="${src}" loading="lazy" alt="${store.name} 매장 사진 ${i+2}">`).join('')}</div>` : ''}
     <div class="sheet-actions">
       ${store.phone ? `<a class="btn btn-secondary" href="tel:${store.phone}">전화하기</a>` : ''}
-      <a class="btn btn-primary" href="${store.naverUrl && store.naverUrl !== '#' ? store.naverUrl : 'https://map.naver.com/p/search/'+encodeURIComponent(store.address || store.name)}" target="_blank" rel="noopener">네이버 지도 열기</a>
+      <a class="btn btn-primary" href="${placeUrl || searchUrl}" target="_blank" rel="noopener">${placeUrl ? '네이버 플레이스' : '네이버 지도 검색'}</a>
     </div>
   `;
   sheet.classList.add('show');

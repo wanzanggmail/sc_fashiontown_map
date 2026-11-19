@@ -90,6 +90,8 @@
   .store-line .f-desc{grid-column:span 10;}
   .store-line .img-cell{grid-column:span 8;}
   .store-line .f-naver{grid-column:span 6;}
+  .store-line .f-address{grid-column:span 14;}
+  .store-line .f-hours{grid-column:span 10;}
   .store-line .f-link{grid-column:span 19;color:var(--ink-soft);font-size:12px;}
   .store-line [data-copylink]{grid-column:span 5;}
   .store-line .btn-ghost, .store-line .btn-danger{padding:8px 6px;font-size:12px;white-space:nowrap;}
@@ -107,7 +109,7 @@
     .store-line [data-del]{grid-column:span 6;}
     .store-line .f-desc{grid-column:span 12;}
     .store-line .img-cell{grid-column:span 12;}
-    .store-line .f-naver{grid-column:span 12;}
+    .store-line .f-naver,.store-line .f-address,.store-line .f-hours{grid-column:span 12;}
     .store-line .f-link{grid-column:span 8;}
     .store-line [data-copylink]{grid-column:span 4;}
   }
@@ -341,6 +343,10 @@ function storeLinkUrl(storeId){
   return base + '?s=' + encodeURIComponent(shortId);
 }
 
+function escapeInput(value){
+  return (value ?? '').replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+}
+
 function renderStores(){
   tbody.innerHTML = '';
   countLabel.textContent = data.stores.length;
@@ -365,6 +371,10 @@ function renderStores(){
           <div class="hint">권장 800×800px 이상<br>(정사각형, 자동 480px로 축소)</div>
         </div>
         <input class="f-naver" data-idx="${idx}" data-f="naverUrl" value="${s.naverUrl||''}" placeholder="네이버 URL">
+      </div>
+      <div class="store-line">
+        <input class="f-address" data-idx="${idx}" data-f="address" value="${escapeInput(s.address)}" placeholder="도로명주소" aria-label="도로명주소">
+        <input class="f-hours" data-idx="${idx}" data-f="hours" value="${escapeInput(s.hours)}" placeholder="영업시간" aria-label="영업시간">
       </div>
       <div class="store-line">
         <input class="f-link" data-linkidx="${idx}" value="${storeLinkUrl(s.id)}" readonly>
