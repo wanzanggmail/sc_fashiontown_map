@@ -56,7 +56,7 @@
   /* ---------- 상단 검색/필터 ---------- */
   #topbar{
     position:absolute;top:0;left:0;right:0;z-index:1000;
-    padding:12px 12px 10px;
+    max-width:480px;padding:10px 12px 8px;
     background:linear-gradient(180deg, rgba(246,241,230,0.97) 0%, rgba(246,241,230,0.88) 70%, rgba(246,241,230,0) 100%);
   }
   .brand{
@@ -89,9 +89,6 @@
     padding:7px 13px;cursor:pointer;white-space:nowrap;transition:all .15s ease;
   }
   .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
-  #resultCount{
-    font-size:12px;color:var(--ink-soft);margin:8px 4px 0;min-height:16px;
-  }
 
   #searchWrap{position:relative;}
   #autocompleteList{
@@ -114,7 +111,7 @@
   #map{position:absolute;inset:0;background:#eee9dc;}
   .leaflet-control-zoom{display:none;} /* 커스텀 줌 버튼 사용 */
   #zoomCtrl{
-    position:absolute;right:12px;bottom:100px;z-index:900;
+    position:absolute;right:12px;bottom:calc(30px + env(safe-area-inset-bottom));z-index:900;
     display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);
     border-radius:12px;overflow:hidden;box-shadow:var(--shadow);
   }
@@ -124,6 +121,7 @@
   #zoomCtrl button:not(:last-child){border-bottom:1px solid var(--line);}
 
   .store-pin{
+    position:relative;width:30px;height:32px;
     display:flex;flex-direction:column;align-items:center;cursor:pointer;
     transform-origin:bottom center;
   }
@@ -136,12 +134,14 @@
   .pin-dot svg{
     display:block;transform:rotate(45deg);width:73%;height:73%;
   }
-  .store-pin.selected .pin-dot{width:32px;height:32px;box-shadow:0 4px 10px rgba(0,0,0,0.35);}
+  .store-pin.selected .pin-dot{transform:translateY(-2px) rotate(-45deg) scale(1.18);box-shadow:0 4px 10px rgba(0,0,0,0.35);}
   .pin-label{
-    margin-top:2px;font-size:10px;font-weight:700;color:var(--ink);
+    position:absolute;top:34px;left:50%;transform:translateX(-50%);
+    visibility:hidden;font-size:10px;font-weight:700;color:var(--ink);
     background:rgba(255,253,248,0.9);padding:1px 5px;border-radius:5px;
     white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.12);
   }
+  .pin-label.visible{visibility:visible;}
 
   /* ---------- 바텀시트 ---------- */
   #sheetBackdrop{
@@ -213,7 +213,7 @@
       <div id="autocompleteList"></div>
     </div>
     <div id="chips"></div>
-    <button id="browseStores" type="button">매장 목록</button> <span id="resultCount"></span>
+    <button id="browseStores" type="button">매장 목록</button>
   </div>
 
   <dialog id="directory" aria-labelledby="directoryTitle">
@@ -330,8 +330,8 @@ STORES.forEach(store=>{
             </div>
             <div class="pin-label">${store.name}</div>
           </div>`,
-    iconSize:[1,1],
-    iconAnchor:[13,32]
+    iconSize:[30,32],
+    iconAnchor:[15,29]
   });
   const marker = L.marker(toLatLng(store.x, store.y), {icon}).addTo(map);
   marker.getElement().setAttribute('aria-label', `${store.name} · ${store.catLabel}`);
@@ -345,7 +345,7 @@ STORES.forEach(store=>{
 const searchInput = document.getElementById('searchInput');
 const clearBtn = document.getElementById('clearBtn');
 const chipsEl = document.getElementById('chips');
-const resultCountEl = document.getElementById('resultCount');
+const browseStoresBtn = document.getElementById('browseStores');
 const emptyStateEl = document.getElementById('emptyState');
 
 let activeCat = null;
@@ -372,6 +372,27 @@ function renderChips(){
   });
 }
 
+function arrangePinLabels(){
+  const area = map.getContainer().getBoundingClientRect();
+  const top = document.getElementById('topbar').getBoundingClientRect().bottom;
+  const pins = [...document.querySelectorAll('.store-pin')].filter(pin => pin.getClientRects().length);
+  const occupied = pins.map(pin => pin.querySelector('.pin-dot').getBoundingClientRect());
+  const overlaps = (a,b) => a.left < b.right + 2 && a.right + 2 > b.left &&
+    a.top < b.bottom + 2 && a.bottom + 2 > b.top;
+  pins.sort((a,b) => Number(b.classList.contains('selected')) - Number(a.classList.contains('selected')));
+
+  for (const pin of pins) {
+    const label = pin.querySelector('.pin-label');
+    const rect = label.getBoundingClientRect();
+    const selected = pin.classList.contains('selected');
+    const inside = rect.left >= area.left && rect.right <= area.right &&
+      rect.top >= top && rect.bottom <= area.bottom;
+    const visible = inside && (selected || !occupied.some(box => overlaps(rect,box)));
+    label.classList.toggle('visible', visible);
+    if (visible) occupied.push(rect);
+  }
+}
+
 function applyFilter(){
   const q = searchInput.value.trim().toLowerCase();
   clearBtn.style.display = q ? 'block' : 'none';
@@ -386,11 +407,8 @@ function applyFilter(){
     if(visible) visibleCount++;
   });
 
-  if(q || activeCat){
-    resultCountEl.textContent = `${visibleCount}개 점포`;
-  } else {
-    resultCountEl.textContent = '';
-  }
+  browseStoresBtn.textContent = `매장 목록 · ${visibleCount}곳`;
+  arrangePinLabels();
   emptyStateEl.style.display = (visibleCount===0) ? 'block' : 'none';
 
   // 검색어로 결과가 1개면 자동 포커스
@@ -506,6 +524,7 @@ function selectStore(id, doFocus){
   selectedId = id;
   const el = document.getElementById('pin-'+id);
   if(el) el.classList.add('selected');
+  arrangePinLabels();
   if(doFocus) focusStore(id);
   openSheet(id);
 }
@@ -555,13 +574,14 @@ function closeSheetFn(){
     if(el) el.classList.remove('selected');
   }
   selectedId = null;
+  arrangePinLabels();
 }
 document.getElementById('closeSheet').onclick = closeSheetFn;
 sheetBackdrop.onclick = closeSheetFn;
 
 const directory = document.getElementById('directory');
 document.getElementById('directoryClose').onclick = () => directory.close();
-document.getElementById('browseStores').onclick = () => {
+browseStoresBtn.onclick = () => {
   hideAutocomplete();
   const query = searchInput.value.trim().toLowerCase();
   const list = document.getElementById('directoryItems');
@@ -583,6 +603,8 @@ document.getElementById('browseStores').onclick = () => {
 
 /* 초기 칩 렌더 */
 renderChips();
+applyFilter();
+map.on('moveend resize', arrangePinLabels);
 
 /* =========================================================
    8) URL로 특정 점포 바로 열기
