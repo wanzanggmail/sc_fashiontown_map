@@ -32,93 +32,99 @@
     }
   ],
   "imageSize": {
-    "w": 460,
-    "h": 1024
+    "w": 1120,
+    "h": 2110
   },
-  "illustrationURL": "map-illustration.png",
+  "illustrationURL": "map-portrait.svg",
   "stores": [
     {
       "id": "store-17",
       "name": "바쏘",
       "cat": "fashion",
-      "x": 113,
-      "y": 218,
+      "x": 580,
+      "y": 710,
       "phone": "0507-1340-4064",
       "naverUrl": "https://map.naver.com/p/entry/place/1850234170",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 10",
-      "hours": ""
+      "hours": "",
+      "positionSource": "naver"
     },
     {
       "id": "store-10",
       "name": "미즈노",
       "cat": "sport",
-      "x": 232,
-      "y": 344,
+      "x": 630,
+      "y": 767,
       "phone": "0507-1414-8268",
       "naverUrl": "https://map.naver.com/p/entry/place/1920109031",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 3-4",
-      "hours": ""
+      "hours": "",
+      "positionSource": "naver"
     },
     {
       "id": "store-7",
       "name": "지센",
       "cat": "fashion",
-      "x": 232,
-      "y": 525,
+      "x": 633,
+      "y": 845,
       "phone": "031-311-3058",
       "naverUrl": "https://map.naver.com/p/entry/place/17893891",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로 3419",
-      "hours": ""
+      "hours": "",
+      "positionSource": "naver"
     },
     {
       "id": "store-24",
       "name": "마코",
       "cat": "golf",
-      "x": 238,
-      "y": 455,
+      "x": 578,
+      "y": 859,
       "phone": "031-312-2949",
       "naverUrl": "https://map.naver.com/p/entry/place/1862297224",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3413번길 4-2",
-      "hours": ""
+      "hours": "",
+      "positionSource": "naver"
     },
     {
       "id": "store-28",
       "name": "파크랜드",
       "cat": "fashion",
-      "x": 183,
-      "y": 737,
+      "x": 582,
+      "y": 946,
       "phone": "031-317-8687",
       "naverUrl": "https://map.naver.com/p/entry/place/13425808",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3413번길 3",
-      "hours": ""
+      "hours": "",
+      "positionSource": "naver"
     },
     {
       "id": "store-19",
       "name": "아레나",
       "cat": "sport",
-      "x": 126,
-      "y": 440,
+      "x": 585,
+      "y": 808,
       "phone": "031-314-1517",
       "naverUrl": "https://map.naver.com/p/entry/place/1411448875",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 9-6",
-      "hours": ""
+      "hours": "",
+      "positionSource": "naver"
     },
     {
       "id": "store-35",
-      "x": null,
-      "y": null,
+      "x": 627,
+      "y": 865,
       "name": "스노우피크",
       "cat": "outdoor",
       "address": "경기도 시흥시 수인로 3417",
@@ -126,12 +132,13 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": "https://map.naver.com/p/entry/place/1538773637"
+      "naverUrl": "https://map.naver.com/p/entry/place/1538773637",
+      "positionSource": "naver"
     },
     {
       "id": "store-36",
-      "x": null,
-      "y": null,
+      "x": 672,
+      "y": 676,
       "name": "블랙야크",
       "cat": "outdoor",
       "address": "경기도 시흥시 수인로 3431",
@@ -145,14 +152,15 @@
         "store-photos/store-36-3.webp",
         "store-photos/store-36-4.webp",
         "store-photos/store-36-5.webp"
-      ]
+      ],
+      "positionSource": "naver"
     },
     {
       "id": "store-27",
       "name": "올포유",
       "cat": "fashion",
-      "x": 123,
-      "y": 655,
+      "x": 589,
+      "y": 919,
       "phone": "031-312-5162",
       "naverUrl": "https://map.naver.com/p/entry/place/31014053",
       "description": "",
@@ -163,12 +171,13 @@
         "store-photos/store-27-2.webp",
         "store-photos/store-27-3.webp",
         "store-photos/store-27-4.webp"
-      ]
+      ],
+      "positionSource": "naver"
     },
     {
       "id": "store-37",
-      "x": null,
-      "y": null,
+      "x": 632,
+      "y": 841,
       "name": "웨스트우드",
       "cat": "outdoor",
       "address": "경기도 시흥시 수인로 3419",
@@ -176,53 +185,57 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": "https://map.naver.com/p/entry/place/1993176563"
+      "naverUrl": "https://map.naver.com/p/entry/place/1993176563",
+      "positionSource": "naver"
     },
     {
       "id": "store-22",
       "name": "MLB",
       "cat": "sport",
-      "x": 238,
-      "y": 504,
+      "x": 601,
+      "y": 876,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3413번길 4",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-1",
       "name": "코오롱스포츠",
       "cat": "outdoor",
-      "x": 313,
-      "y": 240,
+      "x": 658,
+      "y": 725,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 2",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-8",
       "name": "데상트",
       "cat": "sport",
-      "x": 219,
-      "y": 589,
+      "x": 622,
+      "y": 873,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로 3417",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-3",
       "name": "스케쳐스",
       "cat": "sport",
-      "x": 239,
-      "y": 225,
+      "x": 630,
+      "y": 713,
       "phone": "031-313-0993",
       "naverUrl": "",
       "description": "편안한 신발과 의류를 판매합니다.",
@@ -232,20 +245,22 @@
       "gallery": [
         "store-photos/store-3-2.webp",
         "store-photos/store-3-3.webp"
-      ]
+      ],
+      "positionSource": "address"
     },
     {
       "id": "store-11",
       "name": "마운티아",
       "cat": "outdoor",
-      "x": 238,
-      "y": 365,
+      "x": 618,
+      "y": 753,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 3-2",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-38",
@@ -264,34 +279,36 @@
       "id": "store-25",
       "name": "제이디엑스",
       "cat": "golf",
-      "x": 222,
-      "y": 542,
+      "x": 582,
+      "y": 884,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3413번길 4-1",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-20",
       "name": "팬텀",
       "cat": "golf",
-      "x": 141,
-      "y": 475,
+      "x": 591,
+      "y": 824,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 9-6",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-21",
       "name": "루이까스텔",
       "cat": "golf",
-      "x": 195,
-      "y": 437,
+      "x": 595,
+      "y": 854,
       "phone": "031-313-8167",
       "naverUrl": "",
       "description": "평상복으로도 입을 수 있는 남녀 골프 의류와 액세서리를 판매합니다.",
@@ -304,12 +321,13 @@
         "store-photos/store-21-4.webp",
         "store-photos/store-21-5.webp",
         "store-photos/store-21-6.webp"
-      ]
+      ],
+      "positionSource": "address"
     },
     {
       "id": "store-39",
-      "x": null,
-      "y": null,
+      "x": 585,
+      "y": 808,
       "name": "핑골프",
       "cat": "golf",
       "address": "경기도 시흥시 수인로3427번길 9-6",
@@ -317,12 +335,13 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "",
+      "positionSource": "address"
     },
     {
       "id": "store-40",
-      "x": null,
-      "y": null,
+      "x": 582,
+      "y": 946,
       "name": "웰메이드",
       "cat": "fashion",
       "address": "경기도 시흥시 수인로3413번길 3",
@@ -334,20 +353,22 @@
       "gallery": [
         "store-photos/store-40-2.webp",
         "store-photos/store-40-3.webp"
-      ]
+      ],
+      "positionSource": "address"
     },
     {
       "id": "store-12",
       "name": "에스티코",
       "cat": "fashion",
-      "x": 202,
-      "y": 389,
+      "x": 619,
+      "y": 786,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3427번길 3-6",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-41",
@@ -366,14 +387,15 @@
       "id": "store-30",
       "name": "마레몬떼",
       "cat": "fashion",
-      "x": 135,
-      "y": 724,
+      "x": 561,
+      "y": 921,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3413번길 5",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-42",
@@ -390,8 +412,8 @@
     },
     {
       "id": "store-43",
-      "x": null,
-      "y": null,
+      "x": 573,
+      "y": 775,
       "name": "까스텔바작",
       "cat": "golf",
       "address": "경기도 시흥시 수인로3427번길 9-2",
@@ -404,12 +426,13 @@
         "store-photos/store-43-2.webp",
         "store-photos/store-43-3.webp",
         "store-photos/store-43-4.webp"
-      ]
+      ],
+      "positionSource": "address"
     },
     {
       "id": "store-44",
-      "x": null,
-      "y": null,
+      "x": 582,
+      "y": 946,
       "name": "와이드앵글",
       "cat": "golf",
       "address": "경기도 시흥시 수인로3413번길 3",
@@ -417,12 +440,13 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "",
+      "positionSource": "address"
     },
     {
       "id": "store-45",
-      "x": null,
-      "y": null,
+      "x": 585,
+      "y": 808,
       "name": "링스",
       "cat": "golf",
       "address": "경기도 시흥시 수인로3427번길 9-6",
@@ -430,14 +454,15 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "",
+      "positionSource": "address"
     },
     {
       "id": "store-23",
       "name": "디스커버리",
       "cat": "outdoor",
-      "x": 159,
-      "y": 559,
+      "x": 627,
+      "y": 865,
       "phone": "031-312-0797",
       "naverUrl": "",
       "description": "남녀 일상복과 아웃도어·스포츠 의류 및 용품을 판매합니다.",
@@ -449,14 +474,15 @@
         "store-photos/store-23-3.webp",
         "store-photos/store-23-4.webp",
         "store-photos/store-23-5.webp"
-      ]
+      ],
+      "positionSource": "address"
     },
     {
       "id": "store-33",
       "name": "골프도",
       "cat": "golf",
-      "x": 340,
-      "y": 84,
+      "x": 674,
+      "y": 651,
       "phone": "",
       "naverUrl": "",
       "description": "",
@@ -470,12 +496,13 @@
         "store-photos/store-33-5.webp",
         "store-photos/store-33-6.webp",
         "store-photos/store-33-7.webp"
-      ]
+      ],
+      "positionSource": "address"
     },
     {
       "id": "store-46",
-      "x": null,
-      "y": null,
+      "x": 595,
+      "y": 854,
       "name": "디즈니골프웨어",
       "cat": "golf",
       "address": "경기도 시흥시 수인로3427번길 9-8",
@@ -483,7 +510,8 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "",
+      "positionSource": "address"
     },
     {
       "id": "store-47",
@@ -502,21 +530,22 @@
       "id": "store-29",
       "name": "PAT",
       "cat": "fashion",
-      "x": 173,
-      "y": 642,
+      "x": 567,
+      "y": 910,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로3413번길 3",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-5",
       "name": "나이키",
       "cat": "sport",
-      "x": 271,
-      "y": 386,
+      "x": 630,
+      "y": 784,
       "phone": "031-317-2094",
       "naverUrl": "https://map.naver.com/p/entry/place/31014916",
       "description": "신발과 의류, 최신 나이키 제품과 할인 상품을 만나볼 수 있습니다.",
@@ -527,27 +556,29 @@
         "store-photos/store-5-2.webp",
         "store-photos/store-5-3.webp",
         "store-photos/store-5-4.webp"
-      ]
+      ],
+      "positionSource": "naver"
     },
     {
       "id": "store-26",
       "name": "블랙인화이트",
       "cat": "other",
-      "x": 66,
-      "y": 693,
+      "x": 558,
+      "y": 873,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로 3413번길 6(신천동)",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-4",
       "name": "뉴발란스",
       "cat": "sport",
-      "x": 285,
-      "y": 342,
+      "x": null,
+      "y": null,
       "phone": "",
       "naverUrl": "",
       "description": "",
@@ -559,8 +590,8 @@
       "id": "store-6",
       "name": "라이프워크",
       "cat": "fashion",
-      "x": 247,
-      "y": 459,
+      "x": 633,
+      "y": 815,
       "phone": "031-318-9074",
       "naverUrl": "",
       "description": "오버핏 스트리트 캐주얼 의류를 판매합니다.",
@@ -573,12 +604,13 @@
         "store-photos/store-6-4.webp",
         "store-photos/store-6-5.webp",
         "store-photos/store-6-6.webp"
-      ]
+      ],
+      "positionSource": "address"
     },
     {
       "id": "store-48",
-      "x": null,
-      "y": null,
+      "x": 573,
+      "y": 775,
       "name": "파사디골프웨어",
       "cat": "golf",
       "address": "경기도 시흥시 수인로 3427번길 9-2 1층",
@@ -586,12 +618,13 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "",
+      "positionSource": "address"
     },
     {
       "id": "store-49",
-      "x": null,
-      "y": null,
+      "x": 630,
+      "y": 767,
       "name": "헤지스",
       "cat": "fashion",
       "address": "경기도 시흥시 수인로 3427번길 3-4",
@@ -599,25 +632,27 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "",
+      "positionSource": "address"
     },
     {
       "id": "store-13",
       "name": "벤제프골프",
       "cat": "golf",
-      "x": 202,
-      "y": 429,
+      "x": 617,
+      "y": 804,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 수인로 3427번길 3-8",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-50",
-      "x": null,
-      "y": null,
+      "x": 617,
+      "y": 804,
       "name": "잠뱅이",
       "cat": "fashion",
       "address": "경기도 시흥시 수인로 3427번길 3-8",
@@ -625,12 +660,13 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": ""
+      "naverUrl": "",
+      "positionSource": "address"
     },
     {
       "id": "store-51",
-      "x": null,
-      "y": null,
+      "x": 630,
+      "y": 713,
       "name": "브렌우드",
       "cat": "fashion",
       "address": "경기도 시흥시 수인로 3427번길4",
@@ -638,7 +674,8 @@
       "hours": "",
       "description": "",
       "image": "",
-      "naverUrl": "https://map.naver.com/p/entry/place/2010777807"
+      "naverUrl": "https://map.naver.com/p/entry/place/2010777807",
+      "positionSource": "address"
     },
     {
       "id": "store-52",
@@ -657,27 +694,29 @@
       "id": "store-32",
       "name": "노스페이스",
       "cat": "outdoor",
-      "x": 105,
-      "y": 1010,
+      "x": 561,
+      "y": 1014,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 삼미시장1길 53",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     },
     {
       "id": "store-31",
       "name": "뱅뱅",
       "cat": "fashion",
-      "x": 99,
-      "y": 985,
+      "x": 572,
+      "y": 993,
       "phone": "",
       "naverUrl": "",
       "description": "",
       "image": "",
       "address": "경기도 시흥시 삼미시장1길 55",
-      "hours": ""
+      "hours": "",
+      "positionSource": "address"
     }
   ]
 }

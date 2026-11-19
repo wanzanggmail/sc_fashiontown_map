@@ -111,7 +111,7 @@
   .ac-cat{font-size:11px;color:var(--ink-soft);flex:none;}
 
   /* ---------- 지도 ---------- */
-  #map{position:absolute;inset:0;background:var(--paper);}
+  #map{position:absolute;inset:0;background:#eee9dc;}
   .leaflet-control-zoom{display:none;} /* 커스텀 줌 버튼 사용 */
   #zoomCtrl{
     position:absolute;right:12px;bottom:100px;z-index:900;
@@ -121,7 +121,7 @@
   #zoomCtrl button{
     width:42px;height:42px;border:none;background:transparent;font-size:20px;color:var(--ink);cursor:pointer;
   }
-  #zoomCtrl button:first-child{border-bottom:1px solid var(--line);}
+  #zoomCtrl button:not(:last-child){border-bottom:1px solid var(--line);}
 
   .store-pin{
     display:flex;flex-direction:column;align-items:center;cursor:pointer;
@@ -222,8 +222,9 @@
   <div id="map"></div>
 
   <div id="zoomCtrl">
-    <button id="zoomIn">+</button>
-    <button id="zoomOut">−</button>
+    <button id="zoomIn" aria-label="확대">+</button>
+    <button id="zoomOut" aria-label="축소">−</button>
+    <button id="zoomOverview" aria-label="주변 지도 전체 보기" title="주변 지도 전체 보기">⌂</button>
   </div>
 
   <div id="emptyState">검색 결과가 없습니다</div>
@@ -273,15 +274,32 @@ map = L.map('map', {
   minZoom: -2,
   maxZoom: 4,
   zoomSnap: 0.25,
-  attributionControl:false,
-  maxBounds: [[-150, -150],[IMG_H+150, IMG_W+150]],
-  maxBoundsViscosity: 0.6
+  attributionControl:true,
+  maxBounds: bounds,
+  maxBoundsViscosity: 1
 });
-L.imageOverlay(illustrationURL, bounds).addTo(map);
-map.fitBounds(bounds, {padding:[10,10]});
+const usesStreetIllustration = illustrationURL === 'map-portrait.svg';
+L.imageOverlay(illustrationURL, bounds, {
+  attribution: usesStreetIllustration ? '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' : ''
+}).addTo(map);
+map.attributionControl.setPrefix(false);
+
+function overview(){
+  map.setMinZoom(-4);
+  const overviewZoom = map.getBoundsZoom(bounds, false, L.point(12, 12));
+  map.setMinZoom(overviewZoom);
+  map.fitBounds(bounds, {padding:[6,6]});
+}
+overview();
+const locatedStores = STORES.filter(store => Number.isFinite(store.x) && Number.isFinite(store.y));
+if (locatedStores.length) {
+  const storeBounds = L.latLngBounds(locatedStores.map(store => toLatLng(store.x, store.y)));
+  map.fitBounds(storeBounds, {paddingTopLeft:[24,165],paddingBottomRight:[24,70],maxZoom:1.25});
+}
 
 document.getElementById('zoomIn').onclick = ()=> map.zoomIn();
 document.getElementById('zoomOut').onclick = ()=> map.zoomOut();
+document.getElementById('zoomOverview').onclick = overview;
 
 /* 좌표 변환: 우리가 만든 x,y(이미지 픽셀) -> leaflet latlng */
 function toLatLng(x,y){ return L.latLng(IMG_H - y, x); }
@@ -500,6 +518,7 @@ function openSheet(id){
       </div>
     </div>
     ${store.description ? `<div class="sheet-desc">${store.description}</div>` : ''}
+    ${store.positionSource === 'address' ? '<div class="sheet-desc">지도 핀은 주소 기준 위치입니다.</div>' : ''}
     <div class="sheet-info">
       ${[['주소',store.address],['영업시간',store.hours],['전화',store.phone]].filter(([,value])=>value).map(([label,value])=>`<div class="info-row"><div class="k">${label}</div><div>${value}</div></div>`).join('')}
     </div>

@@ -152,7 +152,7 @@
       </div>
     </div>
     <div id="mapPickWrap">
-      <img id="mapPickImg" src="map-illustration.png" alt="지도">
+      <img id="mapPickImg" alt="지도">
       <div id="mapPickDots"></div>
       <div id="mapPickCoord"></div>
     </div>
@@ -303,6 +303,7 @@ async function loadData(){
 }
 
 function render(){
+  mapPickImg.src = data.illustrationURL || "map-illustration.png";
   renderCats();
   renderStores();
 }
@@ -386,7 +387,10 @@ function renderStores(){
   tbody.querySelectorAll('input[data-f],select[data-f]').forEach(el => {
     el.oninput = () => {
       const idx = el.dataset.idx, f = el.dataset.f;
-      if (f === 'x' || f === 'y') data.stores[idx][f] = el.value === '' ? null : Number(el.value);
+      if (f === 'x' || f === 'y') {
+        data.stores[idx][f] = el.value === '' ? null : Number(el.value);
+        delete data.stores[idx].positionSource;
+      }
       else data.stores[idx][f] = el.value;
       if (f === 'x' || f === 'y' || f === 'cat') renderMapDots();
     };
@@ -477,6 +481,7 @@ mapPickWrap.addEventListener('click', (e) => {
   const y = Math.round((e.clientY - rect.top) / rect.height * data.imageSize.h);
   const store = data.stores[pinTargetIdx];
   store.x = x; store.y = y;
+  delete store.positionSource;
   pinHintEl.textContent = `"${store.name}" 좌표를 (${x}, ${y})로 이동했습니다.`;
   pinTargetIdx = null;
   renderStores();
