@@ -351,8 +351,8 @@ function renderStores(){
       <div class="store-line">
         <input class="f-name" data-idx="${idx}" data-f="name" value="${s.name}" placeholder="점포명">
         <select class="f-cat" data-idx="${idx}" data-f="cat">${catOptions(s.cat)}</select>
-        <input class="f-x" data-idx="${idx}" data-f="x" type="number" value="${s.x}" placeholder="X">
-        <input class="f-y" data-idx="${idx}" data-f="y" type="number" value="${s.y}" placeholder="Y">
+        <input class="f-x" data-idx="${idx}" data-f="x" type="number" value="${s.x ?? ''}" placeholder="X">
+        <input class="f-y" data-idx="${idx}" data-f="y" type="number" value="${s.y ?? ''}" placeholder="Y">
         <input class="f-phone" data-idx="${idx}" data-f="phone" value="${s.phone||''}" placeholder="전화번호">
         <button class="btn-ghost" data-pin="${idx}">${idx===pinTargetIdx ? '여기 클릭 대기중' : '여기로'}</button>
         <button class="btn-danger" data-del="${idx}">삭제</button>
@@ -376,7 +376,7 @@ function renderStores(){
   tbody.querySelectorAll('input[data-f],select[data-f]').forEach(el => {
     el.oninput = () => {
       const idx = el.dataset.idx, f = el.dataset.f;
-      if (f === 'x' || f === 'y') data.stores[idx][f] = Number(el.value);
+      if (f === 'x' || f === 'y') data.stores[idx][f] = el.value === '' ? null : Number(el.value);
       else data.stores[idx][f] = el.value;
       if (f === 'x' || f === 'y' || f === 'cat') renderMapDots();
     };
@@ -435,6 +435,7 @@ function renderMapDots(){
   mapPickDots.innerHTML = '';
   data.stores.forEach((s, idx) => {
     const cat = data.categories.find(c => c.id === s.cat);
+    if (!Number.isFinite(s.x) || !Number.isFinite(s.y)) return;
     const dot = document.createElement('div');
     dot.className = 'map-dot' + (idx === pinTargetIdx ? ' target' : '');
     dot.style.left = (s.x / data.imageSize.w * 100) + '%';

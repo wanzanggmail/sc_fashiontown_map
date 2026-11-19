@@ -34,7 +34,7 @@
 }
 </script>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
   :root{
@@ -187,6 +187,15 @@
     text-align:center;color:var(--ink-soft);font-size:13px;background:var(--card);
     padding:14px 20px;border-radius:12px;box-shadow:var(--shadow);display:none;
   }
+  #browseStores,#directoryClose{border:1px solid var(--line);border-radius:8px;padding:7px 12px;background:var(--card);color:var(--ink);cursor:pointer}
+  #browseStores{margin-top:6px}
+  #directory{width:min(92vw,480px);max-height:74vh;border:0;border-radius:16px;padding:0;color:var(--ink);background:var(--card)}
+  #directory::backdrop{background:#231f1aaa}
+  #directory header{position:sticky;top:0;background:var(--card);padding:14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+  #directoryItems button{display:block;width:100%;padding:12px 16px;text-align:left;color:inherit;background:transparent;border:0;border-bottom:1px solid var(--line);cursor:pointer}
+  #directoryItems small{display:block;margin-top:4px;color:var(--ink-soft)}
+  .store-gallery{display:flex;gap:8px;overflow-x:auto;margin-top:12px;scroll-snap-type:x proximity}
+  .store-gallery img{height:clamp(135px,22vh,205px);max-width:90%;object-fit:contain;border-radius:8px;scroll-snap-align:start}
 </style>
 </head>
 <body>
@@ -203,9 +212,13 @@
       <div id="autocompleteList"></div>
     </div>
     <div id="chips"></div>
-    <div id="resultCount"></div>
+    <button id="browseStores" type="button">매장 목록</button> <span id="resultCount"></span>
   </div>
 
+  <dialog id="directory" aria-labelledby="directoryTitle">
+    <header><strong id="directoryTitle">매장 목록</strong><button type="button" id="directoryClose">닫기</button></header>
+    <div id="directoryItems"></div>
+  </dialog>
   <div id="map"></div>
 
   <div id="zoomCtrl">
@@ -277,6 +290,7 @@ function toLatLng(x,y){ return L.latLng(IMG_H - y, x); }
    5) 마커 생성
 ========================================================= */
 STORES.forEach(store=>{
+  if (!Number.isFinite(store.x) || !Number.isFinite(store.y)) return;
   const color = catMap[store.cat].color;
   const icon = L.divIcon({
     className:'',
@@ -447,6 +461,7 @@ let selectedId = null;
 function focusStore(id){
   const store = STORES.find(s=>s.id===id);
   if(!store) return;
+  if (!Number.isFinite(store.x) || !Number.isFinite(store.y)) return;
   map.flyTo(toLatLng(store.x, store.y), Math.max(map.getZoom(), 1.5), {duration:0.6});
 }
 
@@ -483,11 +498,12 @@ function openSheet(id){
     </div>
     ${store.description ? `<div class="sheet-desc">${store.description}</div>` : ''}
     <div class="sheet-info">
-      <div class="info-row"><div class="k">전화</div><div>${store.phone}</div></div>
+      ${[['주소',store.address],['영업시간',store.hours],['전화',store.phone]].filter(([,value])=>value).map(([label,value])=>`<div class="info-row"><div class="k">${label}</div><div>${value}</div></div>`).join('')}
     </div>
+    ${store.gallery?.length ? `<div class="store-gallery" aria-label="매장 사진">${store.gallery.map((src,i)=>`<img src="${src}" loading="lazy" alt="${store.name} 매장 사진 ${i+2}">`).join('')}</div>` : ''}
     <div class="sheet-actions">
-      <a class="btn btn-secondary" href="tel:${store.phone}">전화하기</a>
-      <a class="btn btn-primary" href="${store.naverUrl}" target="_blank" rel="noopener">네이버플레이스 길찾기</a>
+      ${store.phone ? `<a class="btn btn-secondary" href="tel:${store.phone}">전화하기</a>` : ''}
+      <a class="btn btn-primary" href="${store.naverUrl && store.naverUrl !== '#' ? store.naverUrl : 'https://map.naver.com/p/search/'+encodeURIComponent(store.address || store.name)}" target="_blank" rel="noopener">네이버 지도 열기</a>
     </div>
   `;
   sheet.classList.add('show');
@@ -505,6 +521,28 @@ function closeSheetFn(){
 }
 document.getElementById('closeSheet').onclick = closeSheetFn;
 sheetBackdrop.onclick = closeSheetFn;
+
+const directory = document.getElementById('directory');
+document.getElementById('directoryClose').onclick = () => directory.close();
+document.getElementById('browseStores').onclick = () => {
+  hideAutocomplete();
+  const query = searchInput.value.trim().toLowerCase();
+  const list = document.getElementById('directoryItems');
+  list.replaceChildren();
+  for (const store of STORES) {
+    if (activeCat && store.cat !== activeCat) continue;
+    if (![store.name,store.catLabel].some(value => value.toLowerCase().includes(query))) continue;
+    const row = document.createElement('button');
+    row.textContent = store.name;
+    const detail = document.createElement('small');
+    detail.textContent = [store.catLabel,store.address].filter(Boolean).join(' · ');
+    row.append(detail);
+    row.onclick = () => { directory.close(); selectStore(store.id,true); };
+    list.append(row);
+  }
+  if (!list.childElementCount) list.textContent = '검색 결과가 없습니다.';
+  directory.showModal();
+};
 
 /* 초기 칩 렌더 */
 renderChips();
