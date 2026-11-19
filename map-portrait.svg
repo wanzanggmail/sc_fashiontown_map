@@ -3,7 +3,7 @@
 <desc>북쪽이 오른쪽을 향하는 세로 지도. 주변 도로와 건물 위치는 OpenStreetMap, 패션타운의 세부 골목과 건물 윤곽은 기존 참고 지도 기준.</desc>
 <style>
 text{font-family:Pretendard,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
-.road-name{fill:#685d4e;font-weight:650;font-size:15px;paint-order:stroke;stroke:#fffdf4;stroke-width:3px;stroke-linejoin:round}
+.road-name{fill:#716759;font-weight:550;font-size:10px;paint-order:stroke;stroke:#fffdf4;stroke-width:1.5px;stroke-linejoin:round}
   .district-path{fill:none;stroke-linecap:round;stroke-linejoin:round}
   .district-building{fill:#e9c5ad;stroke:#ba9a85;stroke-width:4.2;stroke-linejoin:round}
   .district-building .cool{fill:#d9d3c5;stroke:#a9a194}
